@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ========== SWIM LANE CONTAINER ========== -->
+    <mxCell id="pool" value="Quy trình Mua hàng — Hệ thống Quản lý Mua hàng Sản xuất v2.0" style="shape=pool;startSize=30;horizontal=1;childLayout=stackLayout;horizontalStack=0;resizeParent=1;resizeParent=1;collapsible=0;marginBottom=0;swimlaneHead=0;fillColor=#1e4d78;fontColor=#ffffff;strokeColor=#1e4d78;fontSize=13;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="30" width="1560" height="1560" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 1: Trưởng bộ phận -->
+    <mxCell id="lane1" value="Trưởng bộ phận" style="swimlane;startSize=30;horizontal=0;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="30" width="1560" height="200" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 2: Phòng mua hàng -->
+    <mxCell id="lane2" value="Phòng mua hàng" style="swimlane;startSize=30;horizontal=0;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="230" width="1560" height="380" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 3: Nhà cung cấp -->
+    <mxCell id="lane3" value="Nhà cung cấp" style="swimlane;startSize=30;horizontal=0;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="610" width="1560" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 4: Giám đốc / PGĐ -->
+    <mxCell id="lane4" value="Giám đốc / PGĐ" style="swimlane;startSize=30;horizontal=0;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="770" width="1560" height="160" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 5: Thủ kho -->
+    <mxCell id="lane5" value="Thủ kho" style="swimlane;startSize=30;horizontal=0;fillColor=#d5f5e3;strokeColor=#1abc9c;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="930" width="1560" height="220" as="geometry" />
+    </mxCell>
+
+    <!-- Lane 6: Kế toán -->
+    <mxCell id="lane6" value="Kế toán" style="swimlane;startSize=30;horizontal=0;fillColor=#fce4d6;strokeColor=#d06060;fontStyle=1;fontSize=11;" vertex="1" parent="pool">
+      <mxGeometry x="0" y="1150" width="1560" height="380" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 1 — TRƯỞNG BỘ PHẬN
+         ============================ -->
+
+    <!-- START -->
+    <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1e4d78;fontColor=#ffffff;strokeColor=#1e4d78;fontSize=11;fontStyle=1;" vertex="1" parent="lane1">
+      <mxGeometry x="50" y="80" width="70" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- UC-05: Tạo PR -->
+    <mxCell id="uc05" value="&lt;b&gt;Tạo PR&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Chọn vật tư, SL, ưu tiên&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-05&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane1">
+      <mxGeometry x="170" y="70" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Diamond: Khẩn cấp? -->
+    <mxCell id="d_khan" value="Khẩn cấp?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="lane1">
+      <mxGeometry x="380" y="65" width="110" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- UC-05B: PR khẩn -->
+    <mxCell id="uc05b" value="&lt;b&gt;PR khẩn cấp&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Lý do + mức ảnh hưởng&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-05B&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="lane1">
+      <mxGeometry x="550" y="70" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-06: Chỉnh sửa/Hủy PR -->
+    <mxCell id="uc06" value="&lt;b&gt;Chỉnh sửa / Hủy PR&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Lịch sử thay đổi, notify&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-06&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane1">
+      <mxGeometry x="170" y="155" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-17: Xác nhận nhận hàng -->
+    <mxCell id="uc17" value="&lt;b&gt;Xác nhận nhận hàng&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Đánh giá chất lượng&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-17&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane1">
+      <mxGeometry x="1270" y="70" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Arrows lane 1 -->
+    <mxCell id="e_start_uc05" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="start" target="uc05" parent="lane1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc05_d" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc05" target="d_khan" parent="lane1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_khan_yes" value="Có" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;" edge="1" source="d_khan" target="uc05b" parent="lane1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_khan_no" value="Không" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="d_khan" target="uc06" parent="lane1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 2 — PHÒNG MUA HÀNG
+         ============================ -->
+
+    <!-- UC-07: Tạo giỏ hàng -->
+    <mxCell id="uc07" value="&lt;b&gt;Tạo giỏ hàng (Cart)&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Lọc PR, multi-select&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-07&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="170" y="60" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-08: Chỉnh sửa cart -->
+    <mxCell id="uc08" value="&lt;b&gt;Chỉnh sửa Cart&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Thêm/bớt PR, sửa SL&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-08&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="170" y="170" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-09: Tạo Order -->
+    <mxCell id="uc09" value="&lt;b&gt;Tạo Order + chọn NCC&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Tổng hợp SL, chọn NCC&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-09&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="380" y="60" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-09B: Chỉnh sửa Order -->
+    <mxCell id="uc09b" value="&lt;b&gt;Chỉnh sửa Order&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Thêm NCC, sửa liên lạc&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-09B&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="380" y="170" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-10: Gửi yêu cầu báo giá -->
+    <mxCell id="uc10" value="&lt;b&gt;Gửi YC báo giá&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Email + link token/NCC&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-10&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="610" y="60" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-12: So sánh & chốt IPO -->
+    <mxCell id="uc12" value="&lt;b&gt;So sánh / Chốt giá&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Confirm giá, xuất IPO PDF&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-12&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="840" y="60" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-12B: Chỉnh sửa IPO -->
+    <mxCell id="uc12b" value="&lt;b&gt;Chỉnh sửa IPO&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Update, ký, upload PDF&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-12B&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="840" y="170" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-14: Mua hàng sau duyệt -->
+    <mxCell id="uc14" value="&lt;b&gt;Mua hàng sau duyệt&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Gửi order cho NCC&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-14&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="1070" y="60" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-15: Cập nhật trạng thái -->
+    <mxCell id="uc15" value="&lt;b&gt;Cập nhật trạng thái&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Đang giao / Đã giao&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-15&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="1070" y="170" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-18: Nhập hóa đơn -->
+    <mxCell id="uc18" value="&lt;b&gt;Nhập hóa đơn&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Upload PDF / link URL&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-18&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="1300" y="60" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-19: Yêu cầu thanh toán -->
+    <mxCell id="uc19" value="&lt;b&gt;Yêu cầu thanh toán&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Khi HĐ + IPO OK&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-19&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane2">
+      <mxGeometry x="1300" y="170" width="150" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Arrows lane 2 -->
+    <mxCell id="e_uc07_uc08" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc07" target="uc08" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc07_uc09" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc07" target="uc09" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc09_uc09b" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc09" target="uc09b" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc09_uc10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc09" target="uc10" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc10_uc12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc10" target="uc12" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc12b_uc12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc12b" target="uc12" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc14_uc15" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc14" target="uc15" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc18_uc19" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc18" target="uc19" parent="lane2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 3 — NHÀ CUNG CẤP
+         ============================ -->
+
+    <!-- Note: bảo mật -->
+    <mxCell id="note_ncc" value="&lt;i&gt;Link token bảo mật riêng cho từng NCC&lt;br&gt;NCC không thấy giá nhau&lt;br&gt;Hỗ trợ form web + upload Excel&lt;/i&gt;" style="text;html=1;strokeColor=#d6b656;fillColor=#fffde7;align=left;verticalAlign=middle;spacingLeft=8;fontSize=10;rounded=1;" vertex="1" parent="lane3">
+      <mxGeometry x="50" y="50" width="260" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-11: Nhập báo giá -->
+    <mxCell id="uc11" value="&lt;b&gt;Nhập báo giá&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Form web / upload Excel&lt;br&gt;Cho phép edit trước deadline&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-11&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="lane3">
+      <mxGeometry x="610" y="40" width="190" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 4 — GIÁM ĐỐC
+         ============================ -->
+
+    <!-- UC-13: Phê duyệt IPO -->
+    <mxCell id="uc13" value="&lt;b&gt;Phê duyệt IPO&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Xem chi tiết + PDF ký&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-13&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="lane4">
+      <mxGeometry x="840" y="50" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Diamond: Duyệt IPO? -->
+    <mxCell id="d_duyet" value="Duyệt?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="lane4">
+      <mxGeometry x="1040" y="45" width="110" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Từ chối label -->
+    <mxCell id="note_tuchoi" value="Từ chối — Ghi lý do" style="text;html=1;strokeColor=#9673a6;fillColor=#f5e6ff;align=center;fontSize=10;rounded=1;" vertex="1" parent="lane4">
+      <mxGeometry x="1040" y="105" width="150" height="30" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 5 — THỦ KHO
+         ============================ -->
+
+    <!-- UC-16: Nhập kho -->
+    <mxCell id="uc16" value="&lt;b&gt;Nhập kho&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Nhận hàng, ghi SL thực nhận&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-16&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5f5e3;strokeColor=#1abc9c;fontSize=11;" vertex="1" parent="lane5">
+      <mxGeometry x="1070" y="40" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Diamond: Hàng đạt? -->
+    <mxCell id="d_dat" value="Hàng đạt?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5f5e3;strokeColor=#1abc9c;fontSize=11;" vertex="1" parent="lane5">
+      <mxGeometry x="1270" y="35" width="110" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- UC-16B: Xuất kho -->
+    <mxCell id="uc16b" value="&lt;b&gt;Xuất kho cho bộ phận&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Phân bổ theo PR gốc&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-16B&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5f5e3;strokeColor=#1abc9c;fontSize=11;" vertex="1" parent="lane5">
+      <mxGeometry x="1270" y="140" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-16C: Hoàn trả -->
+    <mxCell id="uc16c" value="&lt;b&gt;Hoàn trả hàng NCC&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Hàng không đạt/sai SP&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-16C&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6d5;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane5">
+      <mxGeometry x="1450" y="40" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Arrows lane 5 -->
+    <mxCell id="e_uc16_d_dat" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc16" target="d_dat" parent="lane5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_dat_yes" value="Đạt" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;strokeColor=#1abc9c;" edge="1" source="d_dat" target="uc16b" parent="lane5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_dat_no" value="Không đạt" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;strokeColor=#d06060;" edge="1" source="d_dat" target="uc16c" parent="lane5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         LANE 6 — KẾ TOÁN
+         ============================ -->
+
+    <!-- UC-23: Đối soát 3 chiều -->
+    <mxCell id="uc23" value="&lt;b&gt;Đối soát 3 chiều&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;IPO – Phiếu nhập – Hóa đơn&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-23&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4d6;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane6">
+      <mxGeometry x="1070" y="60" width="170" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Diamond: Khớp? -->
+    <mxCell id="d_khop" value="Khớp?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fce4d6;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane6">
+      <mxGeometry x="1280" y="55" width="100" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- UC-20: Xử lý thanh toán -->
+    <mxCell id="uc20" value="&lt;b&gt;Xử lý thanh toán&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Nhập TT, đóng invoice&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-20&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4d6;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane6">
+      <mxGeometry x="1300" y="170" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- Note: chênh lệch -->
+    <mxCell id="note_chenhlech" value="&lt;i&gt;Chênh lệch vượt ngưỡng:&lt;br&gt;Điều tra / Debit / Credit Note&lt;/i&gt;" style="text;html=1;strokeColor=#d06060;fillColor=#ffe8e8;align=left;verticalAlign=middle;spacingLeft=8;fontSize=10;rounded=1;" vertex="1" parent="lane6">
+      <mxGeometry x="1070" y="175" width="190" height="55" as="geometry" />
+    </mxCell>
+
+    <!-- UC-22: Export kế toán -->
+    <mxCell id="uc22" value="&lt;b&gt;Export kế toán&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Excel/CSV → import phần mềm KT&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-22&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4d6;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane6">
+      <mxGeometry x="1300" y="270" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- UC-24: Đánh giá NCC -->
+    <mxCell id="uc24" value="&lt;b&gt;Đánh giá NCC&lt;/b&gt;&lt;br&gt;&lt;font style='font-size:10px'&gt;Chấm điểm, xếp hạng định kỳ&lt;/font&gt;&lt;br&gt;&lt;font style='font-size:9px;color:#555'&gt;UC-24&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4d6;strokeColor=#d06060;fontSize=11;" vertex="1" parent="lane6">
+      <mxGeometry x="1070" y="270" width="160" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- END -->
+    <mxCell id="end" value="End" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1e4d78;fontColor=#ffffff;strokeColor=#1e4d78;fontSize=11;fontStyle=1;aspect=fixed;" vertex="1" parent="lane6">
+      <mxGeometry x="1500" y="285" width="50" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- Arrows lane 6 -->
+    <mxCell id="e_uc23_d_khop" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc23" target="d_khop" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_khop_yes" value="Khớp" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;strokeColor=#1abc9c;" edge="1" source="d_khop" target="uc20" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_d_khop_no" value="Chênh lệch" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;strokeColor=#d06060;" edge="1" source="d_khop" target="note_chenhlech" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc20_uc22" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc20" target="uc22" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc20_uc24" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc20" target="uc24" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_uc22_end" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc22" target="end" parent="lane6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ============================
+         CROSS-LANE CONNECTIONS
+         ============================ -->
+
+    <!-- Trưởng BP → Phòng MH: notify -->
+    <mxCell id="e_uc06_uc07" value="notify PR" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#6c8ebf;" edge="1" source="uc06" target="uc07" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Phòng MH (UC-10) → NCC (UC-11): gửi link -->
+    <mxCell id="e_uc10_uc11" value="gửi link báo giá" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#82b366;" edge="1" source="uc10" target="uc11" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- NCC (UC-11) → Phòng MH (UC-12): submit báo giá -->
+    <mxCell id="e_uc11_uc12" value="submit báo giá" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#d6b656;" edge="1" source="uc11" target="uc12" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Phòng MH (UC-12) → GĐ (UC-13): submit duyệt -->
+    <mxCell id="e_uc12_uc13" value="submit duyệt" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;" edge="1" source="uc12" target="uc13" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- GĐ: Duyệt → UC-14 -->
+    <mxCell id="e_dduyet_uc14" value="Đã duyệt" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;" edge="1" source="d_duyet" target="uc14" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- GĐ (UC-13) → d_duyet -->
+    <mxCell id="e_uc13_dduyet" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="uc13" target="d_duyet" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- GĐ: Từ chối → UC-12B -->
+    <mxCell id="e_dduyet_uc12b" value="Từ chối" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#d06060;" edge="1" source="d_duyet" target="uc12b" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- UC-14 → UC-16 (Thủ kho nhập kho) -->
+    <mxCell id="e_uc15_uc16" value="hàng vào kho" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#1abc9c;" edge="1" source="uc15" target="uc16" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- UC-16B → UC-17 (Trưởng BP xác nhận) -->
+    <mxCell id="e_uc16b_uc17" value="hàng đến bộ phận" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#1abc9c;" edge="1" source="uc16b" target="uc17" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- UC-17 → UC-18 (nhập HĐ) -->
+    <mxCell id="e_uc17_uc18" value="đóng request" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#6c8ebf;" edge="1" source="uc17" target="uc18" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- UC-19 → UC-23 (kế toán đối soát) -->
+    <mxCell id="e_uc19_uc23" value="yêu cầu TT" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d06060;" edge="1" source="uc19" target="uc23" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- UC-05B → GĐ duyệt khẩn (lane GĐ) -->
+    <mxCell id="e_uc05b_uc13" value="duyệt khẩn" style="edgeStyle=orthogonalEdgeStyle;dashed=1;strokeColor=#d6b656;" edge="1" source="uc05b" target="uc13" parent="pool">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
