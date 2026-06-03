@@ -1,32 +1,39 @@
 version: "3.9"
 
 services:
+  # ── Microsoft SQL Server 2022 ──────────────────────────────
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: procurement_db
+    restart: always
     environment:
-      SA_PASSWORD: "${DB_PASSWORD:-YourStrong@Password123}"
+      SA_PASSWORD: "${DB_PASSWORD}"
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"
-    ports:
-      - "1433:1433"           # Expose để kết nối bằng SSMS / DBeaver từ host
+      MSSQL_PID: "Standard"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./sql/db.sql:/docker-entrypoint-initdb.d/db.sql:z
+      - ./sql/seed_master_data.sql:/docker-entrypoint-initdb.d/seed_master_data.sql:z
+      - ./sql/init.sh:/init.sh:z
+    ports:
+      - "1433:1433"           # Expose để kết nối bằng SSMS / DBeaver từ host
     healthcheck:
-      test: >
-        /opt/mssql-tools/bin/sqlcmd
-        -S localhost -U sa -P "${DB_PASSWORD:-YourStrong@Password123}"
-        -Q "SELECT 1" -b -o /dev/null
+      test: [
+        "CMD-SHELL",
+        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${DB_PASSWORD}\" -C -Q 'SELECT 1' -b -o /dev/null"
+      ]
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 40s
+    entrypoint: >
+      /bin/bash -c "/opt/mssql/bin/sqlservr & /init.sh && wait"
 
+  # ── Redis ──────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: procurement_redis
-    ports:
-      - "6379:6379"           # Expose để debug từ host
+    restart: always
     volumes:
       - redis_data:/data
     healthcheck:
