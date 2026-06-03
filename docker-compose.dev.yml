@@ -1,39 +1,32 @@
 version: "3.9"
 
 services:
-  # ── Microsoft SQL Server 2022 ──────────────────────────────
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: procurement_db
-    restart: always
     environment:
-      SA_PASSWORD: "${DB_PASSWORD}"
+      SA_PASSWORD: "${DB_PASSWORD:-YourStrong@Password123}"
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Standard"
-    volumes:
-      - mssql_data:/var/opt/mssql
-      - ./sql/db.sql:/docker-entrypoint-initdb.d/db.sql:z
-      - ./sql/seed_master_data.sql:/docker-entrypoint-initdb.d/seed_master_data.sql:z
-      - ./sql/init.sh:/init.sh:z
+      MSSQL_PID: "Developer"
     ports:
       - "1433:1433"           # Expose để kết nối bằng SSMS / DBeaver từ host
+    volumes:
+      - mssql_data:/var/opt/mssql
     healthcheck:
-      test: [
-        "CMD-SHELL",
-        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${DB_PASSWORD}\" -C -Q 'SELECT 1' -b -o /dev/null"
-      ]
+      test: >
+        /opt/mssql-tools/bin/sqlcmd
+        -S localhost -U sa -P "${DB_PASSWORD:-YourStrong@Password123}"
+        -Q "SELECT 1" -b -o /dev/null
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 40s
-    entrypoint: >
-      /bin/bash -c "/opt/mssql/bin/sqlservr & /init.sh && wait"
 
-  # ── Redis ──────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: procurement_redis
-    restart: always
+    ports:
+      - "6379:6379"           # Expose để debug từ host
     volumes:
       - redis_data:/data
     healthcheck:
@@ -42,61 +35,53 @@ services:
       timeout: 3s
       retries: 5
 
-  # ── Django Application (Gunicorn) ──────────────────────────
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: procurement_app
-    restart: always
     env_file: .env
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.production
-    volumes:
-      - media_data:/app/media
-      - static_data:/app/staticfiles
+      DJANGO_SETTINGS_MODULE: config.settings.development
     ports:
-      - "2681:8000"
+      - "8000:8000"
+    volumes:
+      - ./src:/app              # Hot-reload: mount toàn bộ src
+      - media_data:/app/media
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
 
-  # ── Celery Worker ──────────────────────────────────────────
   worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: procurement_worker
-    restart: always
     env_file: .env
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.production
+      DJANGO_SETTINGS_MODULE: config.settings.development
     command: >
       celery -A infrastructure.tasks.celery worker
-      --loglevel=warning
-      --concurrency=4
+      --loglevel=info
+      --concurrency=2
       -Q default,emails
     volumes:
-      - ./src:/app:z
-      - media_data:/app/media
+      - ./src:/app
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
 
-  # ── Nginx Reverse Proxy ────────────────────────────────────
   nginx:
     image: nginx:1.27-alpine
     container_name: procurement_nginx
-    restart: always
     ports:
-      - "2680:80"
+      - "80:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - static_data:/app/staticfiles:ro
       - media_data:/app/media:ro
     depends_on:
       - app
@@ -105,4 +90,3 @@ volumes:
   mssql_data:
   redis_data:
   media_data:
-  static_data:
