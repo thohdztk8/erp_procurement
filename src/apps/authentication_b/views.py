@@ -55,8 +55,9 @@ class RefreshTokenView(APIView):
                 status=status.HTTP_200_OK,
             )
         except TokenError as exc:
+            logger.warning("Refresh token failed due to invalid/expired token: %s", exc, exc_info=True)
             return Response(
-                {"detail": str(exc)},
+                {"detail": "refresh_token không hợp lệ hoặc đã hết hạn."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
