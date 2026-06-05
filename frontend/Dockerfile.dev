@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy các file package định nghĩa dependencies
+COPY package.json package-lock.json* ./
+
+# Cài đặt dependencies
+RUN npm install
+
+# Sao chép mã nguồn còn lại
+COPY . .
+
+EXPOSE 5173
+
+# Khởi chạy Vite dev server lắng nghe trên tất cả interfaces để truy cập từ ngoài container
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

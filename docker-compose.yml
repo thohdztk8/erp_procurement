@@ -127,6 +127,15 @@ services:
   #     redis:
   #       condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: procurement_frontend
+    restart: always
+    depends_on:
+      - app
+
   # ── Nginx Reverse Proxy ────────────────────────────────────
   nginx:
     image: nginx:1.27-alpine
@@ -140,6 +149,7 @@ services:
       - media_data:/app/media:ro
     depends_on:
       - app
+      - frontend
 
 volumes:
   mssql_data:
