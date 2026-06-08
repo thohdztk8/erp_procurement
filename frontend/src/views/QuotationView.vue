@@ -7,6 +7,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import BaseButtons from '@/components/BaseButtons.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
+import BaseIcon from '@/components/BaseIcon.vue'
 import { cartOrderService, quotationService } from '@/services/api'
 
 const orders = ref([])
