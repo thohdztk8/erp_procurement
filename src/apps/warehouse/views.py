@@ -27,7 +27,10 @@ class ReceiptCreateView(APIView):
         try:
             receipt = WarehouseService.create_receipt(request.user, serializer.validated_data)
         except ValueError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response(
+                {"detail": "Không thể tạo phiếu nhập kho."},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
 
         return Response(
             {

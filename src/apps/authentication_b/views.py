@@ -55,8 +55,9 @@ class RefreshTokenView(APIView):
                 status=status.HTTP_200_OK,
             )
         except TokenError as exc:
+            logger.warning("Refresh token failed due to invalid/expired token: %s", exc, exc_info=True)
             return Response(
-                {"detail": str(exc)},
+                {"detail": "refresh_token không hợp lệ hoặc đã hết hạn."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -80,7 +81,11 @@ class LogoutView(APIView):
                 status=status.HTTP_200_OK,
             )
         except TokenError as exc:
-            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.warning("Logout failed due to invalid refresh token: %s", exc, exc_info=True)
+            return Response(
+                {"detail": "refresh_token không hợp lệ hoặc đã hết hạn."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class ProfileView(APIView):
