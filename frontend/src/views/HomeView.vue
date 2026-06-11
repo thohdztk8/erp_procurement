@@ -25,7 +25,7 @@ const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 const fetchPRs = async () => {
   try {
     const response = await prService.getPRs()
-    prs.value = response.results || []
+    prs.value = response.data.items || []
     
     // Tính toán số liệu thống kê
     stats.value.total = prs.value.length
