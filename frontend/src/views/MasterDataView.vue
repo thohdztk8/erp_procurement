@@ -35,14 +35,14 @@ const fetchData = async () => {
   isLoading.value = true
   try {
     const matRes = await masterService.getMaterials()
-    materials.value = matRes.results || []
+    materials.value = matRes.data.items || []
     
     const supRes = await masterService.getSuppliers()
-    suppliers.value = supRes.results || []
+    suppliers.value = supRes.data.items || []
 
     if (isAdmin.value) {
       const userRes = await masterService.getUsers()
-      users.value = userRes.results || []
+      users.value = userRes.data.items || []
     }
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu gốc:', error)
