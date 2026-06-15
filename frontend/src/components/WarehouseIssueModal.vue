@@ -69,10 +69,8 @@ const submit = () => {
     pr_id: form.pr_id ? parseInt(form.pr_id) : null,
     branch_id: form.branch_id ? parseInt(form.branch_id) : 1,
     dept_id: form.dept_id ? parseInt(form.dept_id) : 1,
-    receiver_user_id: form.receiver_user_id ? parseInt(form.receiver_user_id) : 1,
-    issue_at: new Date(form.issue_at).toISOString(),
-    items: form.items.map(it => ({ material_id: it.material_id, qty_issued: it.qty_issued })),
-    note: form.note
+    receiver_id: form.receiver_user_id ? parseInt(form.receiver_user_id) : 1,
+    items: form.items.map(it => ({ material_id: it.material_id, qty_issued: it.qty_issued }))
   })
 }
 </script>
