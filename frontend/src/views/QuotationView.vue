@@ -8,7 +8,10 @@ import BaseButtons from '@/components/BaseButtons.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
 import BaseIcon from '@/components/BaseIcon.vue'
-import { cartOrderService, quotationService } from '@/services/api'
+import { cartOrderService, quotationService, ipoService } from '@/services/api'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const orders = ref([])
 const selectedOrderId = ref(null)
@@ -56,7 +59,27 @@ const handleSelectWinner = async (quotationId) => {
     if (currentOrder) selectOrder(currentOrder)
     fetchOrders()
   } catch (error) {
-    alert('Lựa chọn thất bại. ' + (error.response?.data?.detail || ''))
+    alert('Phê duyệt thất bại: ' + (error.response?.data?.detail || ''))
+  }
+}
+
+const handleCreateIPO = async (quotation) => {
+  if (!confirm('Tạo Hợp đồng nguyên tắc (IPO) từ báo giá này?')) return
+  try {
+    const payload = {
+      order_id: selectedOrderId.value,
+      supplier_id: quotation.supplier_id,
+      items: quotation.items.map(it => ({
+        order_item_id: it.order_item_id,
+        qty_final: parseFloat(it.qty_offered),
+        unit_price: parseFloat(it.unit_price_offered)
+      }))
+    }
+    await ipoService.createIPOVersion(payload)
+    alert('Đã tạo Hợp đồng nguyên tắc (IPO) thành công. Chuyển đến trang Quản lý Hợp đồng.')
+    router.push('/contracts')
+  } catch (err) {
+    alert('Tạo IPO thất bại: ' + (err.response?.data?.detail || ''))
   }
 }
 
@@ -151,14 +174,23 @@ const formatCurrency = (val) => {
                 </table>
               </div>
 
-              <!-- Button Chọn thắng thầu -->
-              <div class="flex justify-end pt-2">
+              <!-- Button Chọn thắng thầu / Tạo IPO -->
+              <div class="flex justify-end pt-2 gap-3 items-center">
                 <span 
                   v-if="q.is_selected" 
                   class="flex items-center gap-1 text-xs font-bold text-green-600 bg-green-50 px-3 py-1 rounded"
                 >
                   <BaseIcon :path="mdiStar" /> Đã chọn thắng thầu
                 </span>
+                
+                <BaseButton 
+                  v-if="q.is_selected"
+                  color="warning" 
+                  label="Tạo Hợp đồng (IPO)" 
+                  small
+                  @click="handleCreateIPO(q)" 
+                />
+
                 <BaseButton 
                   v-else
                   color="success" 

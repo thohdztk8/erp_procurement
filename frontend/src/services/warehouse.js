@@ -18,7 +18,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async getReceipts() {
-    return await api.get('/inventory/receipts')
+    return await api.get('/warehouse/receipts')
   },
 
   /**
@@ -44,7 +44,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async createIssue(data) {
-    return await api.post('/inventory/issues', data)
+    return await api.post('/warehouse/issues/create', data)
   },
 
   /**
@@ -52,7 +52,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async getIssues() {
-    return await api.get('/inventory/issues')
+    return await api.get('/warehouse/issues')
   },
 
   /**
@@ -62,7 +62,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async confirmIssueReceipt(issueId, data) {
-    return await api.post(`/inventory/issues/${issueId}/confirm-receipt`, data)
+    return await api.post(`/warehouse/issues/${issueId}/confirm-receipt`, data)
   },
 
   /**
@@ -71,7 +71,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async createReturnOrder(data) {
-    return await api.post('/inventory/return-orders', data)
+    return await api.post('/warehouse/return-orders/create', data)
   },
 
   /**
@@ -79,7 +79,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async getReturnOrders() {
-    return await api.get('/inventory/return-orders')
+    return await api.get('/warehouse/return-orders')
   },
 
   /**
@@ -89,7 +89,7 @@ export const warehouseService = {
    * @returns {Promise<object>}
    */
   async updateReturnStatus(returnId, data) {
-    return await api.patch(`/inventory/return-orders/${returnId}/status`, data)
+    return await api.patch(`/warehouse/return-orders/${returnId}/status`, data)
   },
 
   /**
@@ -98,6 +98,6 @@ export const warehouseService = {
    * @returns {Promise<object>} Movement history.
    */
   async getMovementHistory(materialId) {
-    return await api.get(`/inventory/stock/${materialId}/movement-history`)
+    return await api.get(`/warehouse/stock/${materialId}/movement-history`)
   }
 }

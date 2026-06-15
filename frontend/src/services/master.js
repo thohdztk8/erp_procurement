@@ -45,7 +45,7 @@ export const masterService = {
    * @returns {Promise<object>}
    */
   async addContractPrice(supplierId, data) {
-    return await api.post(`/suppliers/${supplierId}/contract-prices`, data)
+    return await api.post(`/master/suppliers/${supplierId}/contract-prices`, data)
   },
 
   /**
@@ -53,7 +53,7 @@ export const masterService = {
    * @returns {Promise<object>} Users.
    */
   async getUsers() {
-    return await api.get('/users')
+    return await api.get('/auth/users')
   },
 
   /**
@@ -62,7 +62,7 @@ export const masterService = {
    * @returns {Promise<object>}
    */
   async createUser(data) {
-    return await api.post('/users', data)
+    return await api.post('/auth/users', data)
   },
 
   /**
@@ -72,7 +72,7 @@ export const masterService = {
    * @returns {Promise<object>}
    */
   async updateUser(id, data) {
-    return await api.put(`/users/${id}`, data)
+    return await api.put(`/auth/users/${id}`, data)
   },
 
   /**
@@ -81,7 +81,7 @@ export const masterService = {
    * @returns {Promise<object>}
    */
   async deactivateUser(id) {
-    return await api.patch(`/users/${id}/deactivate`)
+    return await api.patch(`/auth/users/${id}/deactivate`)
   },
 
   /**
@@ -89,7 +89,7 @@ export const masterService = {
    * @returns {Promise<object>} Roles.
    */
   async getRoles() {
-    return await api.get('/roles')
+    return await api.get('/auth/roles')
   },
 
   /**
@@ -97,7 +97,7 @@ export const masterService = {
    * @returns {Promise<object>} Permissions.
    */
   async getPermissions() {
-    return await api.get('/permissions')
+    return await api.get('/auth/permissions')
   },
 
   /**
@@ -107,6 +107,6 @@ export const masterService = {
    * @returns {Promise<object>}
    */
   async updateRolePermissions(roleId, permissionIds) {
-    return await api.put(`/roles/${roleId}/permissions`, { permission_ids: permissionIds })
+    return await api.put(`/auth/roles/${roleId}/permissions`, { permission_ids: permissionIds })
   }
 }

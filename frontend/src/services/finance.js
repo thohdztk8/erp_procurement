@@ -75,8 +75,8 @@ export const financeService = {
    * @param {string} comment - Remarks.
    * @returns {Promise<object>}
    */
-  async approvePayment(payment_request_id, action, comment) {
-    return await api.post('/invoice/payment/approve', { payment_request_id, action, comment })
+  async approvePayment(payment_id, action, note) {
+    return await api.post('/invoice/payment/approve', { payment_id, action, note })
   },
 
   /**
@@ -128,7 +128,7 @@ export const financeService = {
    * @returns {Promise<object>}
    */
   async getExportTemplates() {
-    return await api.get('/accounting/export-templates')
+    return await api.get('/invoice/accounting/export-templates')
   },
 
   /**
@@ -137,7 +137,7 @@ export const financeService = {
    * @returns {Promise<object>} Export file link.
    */
   async createExport(data) {
-    return await api.post('/accounting/exports', data)
+    return await api.post('/invoice/accounting/exports', data)
   },
 
   /**

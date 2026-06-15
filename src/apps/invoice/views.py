@@ -15,8 +15,10 @@ from .serializers import (
     PaymentApproveSerializer,
     PaymentRequestSerializer,
     ThreeWayMatchingSerializer,
+    SupplierEvaluationSerializer,
+    SupplierEvaluationCreateSerializer,
 )
-from .services import MatchingService, PaymentService
+from .services import MatchingService, PaymentService, EvaluationService
 
 
 class InvoiceCreateView(APIView):
@@ -43,7 +45,7 @@ class InvoiceListView(APIView):
 
         inv_status = request.query_params.get("status")
         if inv_status:
-            qs = qs.filter(invoice_status=inv_status)
+            qs = qs.filter(matching_status=inv_status)
 
         supplier_id = request.query_params.get("supplier_id")
         if supplier_id:
@@ -146,7 +148,7 @@ class PaymentApproveView(APIView):
 
         try:
             payment = PaymentRequest.objects.select_related("invoice").get(
-                payment_id=serializer.validated_data["payment_id"]
+                payment_req_id=serializer.validated_data["payment_id"]
             )
         except PaymentRequest.DoesNotExist:
             return Response({"detail": "Không tìm thấy yêu cầu thanh toán."}, status=404)
@@ -168,12 +170,60 @@ class PaymentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = PaymentRequest.objects.select_related("invoice__supplier", "requested_by").order_by("-created_at")
+        qs = PaymentRequest.objects.select_related("invoice__supplier", "applicant").order_by("-created_at")
 
         pay_status = request.query_params.get("status")
         if pay_status:
-            qs = qs.filter(payment_status=pay_status)
+            qs = qs.filter(req_status=pay_status)
 
         paginator = StandardResultsPagination()
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(PaymentRequestSerializer(page, many=True).data)
+
+class SupplierEvaluationCreateView(APIView):
+    """POST /api/v2/invoice/supplier-evaluation/create"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = SupplierEvaluationCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        evaluation = EvaluationService.evaluate_supplier(
+            user=request.user,
+            supplier_id=data["supplier_id"],
+            period_type=data["period_type"],
+            period_value=data["period_value"],
+            start_date=data["period_start_date"],
+            end_date=data["period_end_date"]
+        )
+
+        return Response(
+            {"message": "Đánh giá nhà cung cấp thành công.", "data": SupplierEvaluationSerializer(evaluation).data},
+            status=status.HTTP_201_CREATED,
+        )
+
+class AccountingExportView(APIView):
+    """POST /api/v2/invoice/accounting/exports"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Giả lập xuất báo cáo
+        return Response({
+            "message": "Đã xuất dữ liệu kế toán thành công.",
+            "data": {
+                "download_url": "https://erp.example.com/downloads/accounting-export-2026.csv"
+            }
+        })
+
+class ExportTemplatesView(APIView):
+    """GET /api/v2/invoice/accounting/export-templates"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "data": [
+                {"id": 1, "name": "Template FAST"},
+                {"id": 2, "name": "Template MISA"}
+            ]
+        })

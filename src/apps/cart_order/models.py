@@ -117,6 +117,9 @@ class OrderSupplier(models.Model):
     supplier = models.ForeignKey(
         Supplier, on_delete=models.PROTECT, db_column="supplier_id"
     )
+    custom_contact_name = models.CharField(max_length=150, null=True, blank=True)
+    custom_contact_email = models.EmailField(null=True, blank=True)
+    custom_contact_phone = models.CharField(max_length=50, null=True, blank=True)
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -7,8 +7,14 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import LoginSerializer, UserProfileSerializer
+from .serializers import (
+    LoginSerializer, UserProfileSerializer, 
+    UserSerializer, UserCreateSerializer, UserUpdateSerializer,
+    RoleSerializer, PermissionSerializer
+)
+from .models import User, Role, Permission
 from .services import AuthService
+from core.pagination.standard import StandardResultsPagination
 
 logger = logging.getLogger("apps")
 
@@ -103,3 +109,76 @@ class HealthCheckView(APIView):
 
     def get(self, request):
         return Response({"message": "OK", "data": {"status": "healthy"}})
+
+
+class UserListView(APIView):
+    """GET /api/v2/auth/users"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = User.objects.select_related("role", "branch", "dept").order_by("-created_at")
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(UserSerializer(page, many=True).data)
+
+    def post(self, request):
+        """POST /api/v2/auth/users"""
+        if not request.user.is_superuser and getattr(request.user.role, 'role_code', '') != 'ADMIN':
+            return Response({"detail": "Forbidden"}, status=403)
+        serializer = UserCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserDetailView(APIView):
+    """PUT /api/v2/auth/users/<id>"""
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        if not request.user.is_superuser and getattr(request.user.role, 'role_code', '') != 'ADMIN':
+            return Response({"detail": "Forbidden"}, status=403)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Not found."}, status=404)
+        
+        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class UserDeactivateView(APIView):
+    """PATCH /api/v2/auth/users/<id>/deactivate"""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        if not request.user.is_superuser and getattr(request.user.role, 'role_code', '') != 'ADMIN':
+            return Response({"detail": "Forbidden"}, status=403)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"detail": "Not found."}, status=404)
+        
+        user.is_active = False
+        user.save(update_fields=['is_active'])
+        return Response({"message": "User deactivated."})
+
+
+class RoleListView(APIView):
+    """GET /api/v2/auth/roles"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = Role.objects.all().order_by("role_name")
+        return Response({"items": RoleSerializer(qs, many=True).data})
+
+
+class PermissionListView(APIView):
+    """GET /api/v2/auth/permissions"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = Permission.objects.all().order_by("module_group", "permission_name")
+        return Response({"items": PermissionSerializer(qs, many=True).data})

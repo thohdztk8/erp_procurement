@@ -6,6 +6,7 @@ from .views import (
     QuotationVersionHistoryView,
     SelectQuotationView,
     VendorPortalSubmitView,
+    VendorPortalDetailView,
 )
 
 # Prefix: /api/v2/quotation/ và /api/v2/vendor-portal/
@@ -17,5 +18,6 @@ urlpatterns = [
     path("<int:quotation_id>/versions", QuotationVersionHistoryView.as_view(), name="quotation-versions"),
 
     # ── Vendor Portal (Public — token SHA-256) ─────────────────
+    path("detail", VendorPortalDetailView.as_view(), name="vendor-portal-detail"),
     path("submit-bid", VendorPortalSubmitView.as_view(), name="vendor-portal-submit"),
 ]

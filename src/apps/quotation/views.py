@@ -34,12 +34,56 @@ class InviteQuotationView(APIView):
             order_id=d["order_id"],
             supplier_ids=d["supplier_ids"],
             deadline=d["deadline_submission"],
+            override_rule=d.get("override_rule", False)
         )
         return Response(
             {"message": f"Đã gửi mời báo giá tới {len(requests)} nhà cung cấp."},
             status=status.HTTP_201_CREATED,
         )
 
+
+class VendorPortalDetailView(APIView):
+    """
+    GET /api/v2/vendor-portal/detail?token=<token>
+    Public endpoint — Fetch details for the vendor portal
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        token_val = request.query_params.get("token")
+        if not token_val:
+            return Response({"detail": "Thiếu token."}, status=400)
+            
+        from django.utils import timezone
+        try:
+            token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(token=token_val)
+        except QuotationToken.DoesNotExist:
+            return Response({"detail": "Token không hợp lệ."}, status=400)
+            
+        if token_obj.is_used:
+            return Response({"detail": "Token đã được sử dụng."}, status=400)
+        if token_obj.expires_at < timezone.now():
+            return Response({"detail": "Token đã hết hạn."}, status=400)
+            
+        order = token_obj.q_request.order
+        supplier = token_obj.q_request.supplier
+        
+        # Build response manually or use serializers
+        data = {
+            "order_code": order.order_code,
+            "supplier_name": supplier.supplier_name,
+            "deadline": token_obj.q_request.deadline_submission,
+            "items": []
+        }
+        
+        for item in order.items.select_related("material"):
+            data["items"].append({
+                "order_item_id": item.order_item_id,
+                "material_name": item.material.material_name if item.material_id else item.material_name_other,
+                "qty_requested": float(item.qty_total_ordered)
+            })
+            
+        return Response({"data": data})
 
 class VendorPortalSubmitView(APIView):
     """
