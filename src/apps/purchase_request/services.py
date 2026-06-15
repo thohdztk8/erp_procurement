@@ -233,3 +233,72 @@ class PRService:
                 requester_name=pr.requester.full_name,
                 urgent_reason=pr.urgent_reason or "",
             )
+
+    @staticmethod
+    @transaction.atomic
+    def update_pr(pr: PurchaseRequisition, user, validated_data: dict) -> PurchaseRequisition:
+        from rest_framework.exceptions import ValidationError
+        if pr.pr_status not in ["DRAFT", "PENDING"]:
+            raise ValidationError("Chỉ có thể sửa đơn ở trạng thái DRAFT hoặc PENDING.")
+        
+        pr.priority_level = validated_data.get("priority_level", pr.priority_level)
+        pr.urgent_reason = validated_data.get("urgent_reason", pr.urgent_reason)
+        pr.urgency_impact = validated_data.get("urgency_impact", pr.urgency_impact)
+        
+        items_data = validated_data.get("items", [])
+        if items_data:
+            pr.items.all().delete()
+            total = 0
+            pr_items = []
+            for item in items_data:
+                qty = item["qty_requested"]
+                price = item.get("estimated_unit_price", 0)
+                total += Decimal(str(qty)) * Decimal(str(price))
+                pr_items.append(PRItem(
+                    pr=pr,
+                    material_id=item.get("material_id"),
+                    material_name_other=item.get("material_name_other"),
+                    qty_requested=qty,
+                    estimated_unit_price=price,
+                    required_deadline=item["required_deadline"],
+                ))
+            PRItem.objects.bulk_create(pr_items)
+            pr.total_estimated_amount = total
+            
+        pr.save()
+        
+        write_audit_log(
+            user=user, action="UPDATE",
+            table_name="PurchaseRequisitions",
+            record_id=pr.pr_id,
+            new_values={"priority": pr.priority_level, "total": str(pr.total_estimated_amount)}
+        )
+        return pr
+
+    @staticmethod
+    @transaction.atomic
+    def cancel_pr(pr: PurchaseRequisition, user) -> PurchaseRequisition:
+        from rest_framework.exceptions import ValidationError
+        if pr.pr_status not in ["DRAFT", "PENDING"]:
+            raise ValidationError("Chỉ có thể hủy đơn ở trạng thái DRAFT hoặc PENDING.")
+        
+        old_status = pr.pr_status
+        pr.pr_status = "CANCELLED"
+        pr.save(update_fields=["pr_status", "updated_at"])
+        
+        PRStatusHistory.objects.create(
+            pr=pr,
+            from_status=old_status,
+            to_status="CANCELLED",
+            changed_by=user,
+            note="Người dùng chủ động hủy PR",
+        )
+        
+        write_audit_log(
+            user=user, action="CANCEL",
+            table_name="PurchaseRequisitions",
+            record_id=pr.pr_id,
+            old_values={"status": old_status},
+            new_values={"status": "CANCELLED"},
+        )
+        return pr

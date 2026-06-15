@@ -104,6 +104,34 @@ class PRDetailView(APIView):
             }
         })
 
+    def put(self, request, pk):
+        try:
+            pr = PurchaseRequisition.objects.get(pr_id=pk)
+        except PurchaseRequisition.DoesNotExist:
+            return Response({"detail": "Không tìm thấy đơn PR."}, status=404)
+            
+        if pr.requester != request.user and not request.user.is_superuser:
+            return Response({"detail": "Bạn không có quyền sửa đơn PR này."}, status=403)
+            
+        serializer = PRCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        pr = PRService.update_pr(pr, request.user, serializer.validated_data)
+        return Response({"message": "Đã cập nhật PR thành công.", "data": PRDetailSerializer(pr).data})
+
+    def delete(self, request, pk):
+        try:
+            pr = PurchaseRequisition.objects.get(pr_id=pk)
+        except PurchaseRequisition.DoesNotExist:
+            return Response({"detail": "Không tìm thấy đơn PR."}, status=404)
+            
+        if pr.requester != request.user and not request.user.is_superuser:
+            return Response({"detail": "Bạn không có quyền hủy đơn PR này."}, status=403)
+            
+        pr = PRService.cancel_pr(pr, request.user)
+        return Response({"message": "Đã hủy đơn PR.", "data": {"pr_status": pr.pr_status}})
+
+
 
 class PRPendingListView(APIView):
     """GET /api/v2/pr/pending-list — Danh sách PR đang chờ TÔI duyệt"""

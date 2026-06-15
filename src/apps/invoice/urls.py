@@ -9,6 +9,9 @@ from .views import (
     PaymentListView,
     PaymentRequestCreateView,
     VerifyMatchingView,
+    SupplierEvaluationCreateView,
+    AccountingExportView,
+    ExportTemplatesView,
 )
 
 # Prefix: /api/v2/invoice/ và /api/v2/payment/
@@ -24,4 +27,11 @@ urlpatterns = [
     path("payment/request", PaymentRequestCreateView.as_view(), name="payment-request"),
     path("payment/approve", PaymentApproveView.as_view(), name="payment-approve"),
     path("payment/", PaymentListView.as_view(), name="payment-list"),
+
+    # ── Evaluation ─────────────────────────────────────────────
+    path("supplier-evaluation/create", SupplierEvaluationCreateView.as_view(), name="supplier-evaluation-create"),
+
+    # ── Export ─────────────────────────────────────────────────
+    path("accounting/export-templates", ExportTemplatesView.as_view(), name="accounting-export-templates"),
+    path("accounting/exports", AccountingExportView.as_view(), name="accounting-export"),
 ]

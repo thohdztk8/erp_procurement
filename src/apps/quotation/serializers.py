@@ -7,6 +7,7 @@ class InviteQuotationSerializer(serializers.Serializer):
     order_id = serializers.IntegerField()
     supplier_ids = serializers.ListField(child=serializers.IntegerField(), min_length=1)
     deadline_submission = serializers.DateTimeField()
+    override_rule = serializers.BooleanField(default=False)
 
     def validate_order_id(self, value):
         from apps.cart_order.models import Order

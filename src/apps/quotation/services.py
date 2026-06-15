@@ -26,15 +26,22 @@ class QuotationService:
 
     @staticmethod
     @transaction.atomic
-    def invite_suppliers(user, order_id: int, supplier_ids: list[int], deadline) -> list[QuotationRequest]:
+    def invite_suppliers(user, order_id: int, supplier_ids: list[int], deadline, override_rule: bool = False) -> list[QuotationRequest]:
         """
         Tạo QuotationRequest + QuotationToken cho mỗi NCC.
         Gửi email mời báo giá async qua Celery.
         """
         from apps.cart_order.models import Order
+        from rest_framework.exceptions import ValidationError
         from infrastructure.tasks.email_tasks import send_quotation_invite_email
 
         order = Order.objects.prefetch_related("order_suppliers").get(order_id=order_id)
+        
+        # Rule check: Need at least 3 suppliers.
+        # This is a hardcoded rule for demo, could be from SystemConfig
+        if not override_rule and len(supplier_ids) < 3:
+            raise ValidationError("Cần chọn ít nhất 3 nhà cung cấp để báo giá. (Vượt quá quy định).")
+
         requests_created = []
 
         for supplier_id in supplier_ids:
@@ -86,7 +93,7 @@ class QuotationService:
         write_audit_log(
             user=user, action="INVITE_QUOTATION",
             table_name="Orders", record_id=order_id,
-            new_values={"supplier_ids": supplier_ids, "deadline": str(deadline)},
+            new_values={"supplier_ids": supplier_ids, "deadline": str(deadline), "override_rule": override_rule},
         )
         return requests_created
 

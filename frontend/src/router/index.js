@@ -85,6 +85,14 @@ const routes = [
     name: 'error',
     component: () => import('@/views/ErrorView.vue'),
   },
+  {
+    meta: {
+      title: 'Vendor Portal',
+    },
+    path: '/vendor-portal',
+    name: 'vendor-portal',
+    component: () => import('@/views/VendorPortalView.vue'),
+  },
 ]
 
 const router = createRouter({
@@ -97,7 +105,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('access_token')
-  if (!isAuthenticated && to.name !== 'login' && to.name !== 'error') {
+  if (!isAuthenticated && to.name !== 'login' && to.name !== 'error' && to.name !== 'vendor-portal') {
     next({ name: 'login' })
   } else if (isAuthenticated && (to.name === 'login' || to.path === '/')) {
     next({ name: 'dashboard' })

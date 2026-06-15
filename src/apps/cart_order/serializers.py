@@ -85,7 +85,14 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 
     def get_suppliers(self, obj):
         return list(
-            obj.order_suppliers.values("supplier__supplier_id", "supplier__supplier_name", "assigned_at")
+            obj.order_suppliers.values(
+                "supplier__supplier_id", 
+                "supplier__supplier_name", 
+                "custom_contact_name",
+                "custom_contact_email",
+                "custom_contact_phone",
+                "assigned_at"
+            )
         )
 
 
@@ -102,3 +109,20 @@ class AddSuppliersSerializer(serializers.Serializer):
         if invalid:
             raise serializers.ValidationError(f"NCC không tồn tại: {list(invalid)}")
         return value
+
+
+class OrderSupplierUpdateSerializer(serializers.Serializer):
+    supplier_id = serializers.IntegerField()
+    custom_contact_name = serializers.CharField(max_length=150, required=False, allow_blank=True, allow_null=True)
+    custom_contact_email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
+    custom_contact_phone = serializers.CharField(max_length=50, required=False, allow_blank=True, allow_null=True)
+
+
+class OrderItemUpdateSerializer(serializers.Serializer):
+    order_item_id = serializers.IntegerField()
+    qty_total_ordered = serializers.DecimalField(max_digits=18, decimal_places=4)
+
+
+class OrderUpdateSerializer(serializers.Serializer):
+    suppliers = OrderSupplierUpdateSerializer(many=True, required=False)
+    items = OrderItemUpdateSerializer(many=True, required=False)

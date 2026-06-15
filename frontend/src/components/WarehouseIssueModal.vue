@@ -11,6 +11,7 @@ const emit = defineEmits(['close', 'save'])
 
 const form = reactive({
   pr_id: '',
+  branch_id: '',
   dept_id: '',
   receiver_user_id: '',
   issue_at: new Date().toISOString().split('T')[0],
@@ -24,10 +25,17 @@ const itemInput = reactive({
   qty_issued: 1
 })
 
+const branches = ref([])
+
 onMounted(async () => {
   try {
     const res = await masterService.getMaterials()
     materials.value = res.results || []
+    
+    // Also fetch branches, use api from client
+    const { default: api } = await import('@/services/client')
+    const branchRes = await api.get('/auth/branches')
+    branches.value = branchRes.data || []
   } catch (error) {
     console.error(error)
   }
@@ -59,11 +67,10 @@ const submit = () => {
   }
   emit('save', {
     pr_id: form.pr_id ? parseInt(form.pr_id) : null,
+    branch_id: form.branch_id ? parseInt(form.branch_id) : 1,
     dept_id: form.dept_id ? parseInt(form.dept_id) : 1,
-    receiver_user_id: form.receiver_user_id ? parseInt(form.receiver_user_id) : 1,
-    issue_at: new Date(form.issue_at).toISOString(),
-    items: form.items.map(it => ({ material_id: it.material_id, qty_issued: it.qty_issued })),
-    note: form.note
+    receiver_id: form.receiver_user_id ? parseInt(form.receiver_user_id) : 1,
+    items: form.items.map(it => ({ material_id: it.material_id, qty_issued: it.qty_issued }))
   })
 }
 </script>
@@ -83,7 +90,13 @@ const submit = () => {
           <FormField label="Ngày xuất">
             <FormControl v-model="form.issue_at" type="date" />
           </FormField>
-          <FormField label="Phòng ban nhận" class="md:col-span-2">
+          <FormField label="Chi nhánh xuất">
+            <select v-model="form.branch_id" class="w-full bg-white dark:bg-gray-800 border rounded p-2 text-sm">
+              <option value="">-- Chọn chi nhánh --</option>
+              <option v-for="b in branches" :key="b.branch_id" :value="b.branch_id">{{ b.branch_name }}</option>
+            </select>
+          </FormField>
+          <FormField label="Phòng ban nhận">
             <FormControl v-model="form.dept_id" placeholder="Phòng Sản xuất..." />
           </FormField>
         </div>

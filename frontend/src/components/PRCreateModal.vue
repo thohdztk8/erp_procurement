@@ -8,11 +8,28 @@ import FormControl from '@/components/FormControl.vue'
 
 const emit = defineEmits(['close', 'save'])
 
+const props = defineProps({
+  editMode: {
+    type: Boolean,
+    default: false
+  },
+  prData: {
+    type: Object,
+    default: () => null
+  }
+})
+
 const prForm = reactive({
-  priority_level: 'NORMAL',
-  urgent_reason: '',
-  urgency_impact: '',
-  items: []
+  priority_level: props.prData ? props.prData.priority_level : 'NORMAL',
+  urgent_reason: props.prData ? (props.prData.urgent_reason || '') : '',
+  urgency_impact: props.prData ? (props.prData.urgency_impact || '') : '',
+  items: props.prData ? props.prData.items.map(i => ({
+    material_id: i.material_id,
+    material_name_other: i.material_name_other || i.material_name,
+    qty_requested: i.qty_requested,
+    estimated_unit_price: i.estimated_unit_price,
+    required_deadline: i.required_deadline.split('T')[0]
+  })) : []
 })
 
 const itemInput = reactive({
@@ -66,7 +83,7 @@ const formatCurrency = (val) => {
     <div class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
       <!-- Header -->
       <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Tạo Yêu Cầu Mua Sắm Mới</h3>
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">{{ editMode ? 'Chỉnh Sửa Yêu Cầu Mua Sắm' : 'Tạo Yêu Cầu Mua Sắm Mới' }}</h3>
         <BaseButton :icon="mdiClose" color="whiteDark" small @click="emit('close')" />
       </div>
 
@@ -153,7 +170,7 @@ const formatCurrency = (val) => {
       <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-800">
         <BaseButtons>
           <BaseButton color="white" label="Hủy" @click="emit('close')" />
-          <BaseButton color="success" label="Lưu nháp (Tạo PR)" @click="handleSubmit" />
+          <BaseButton color="success" :label="editMode ? 'Lưu thay đổi' : 'Lưu nháp (Tạo PR)'" @click="handleSubmit" />
         </BaseButtons>
       </div>
     </div>

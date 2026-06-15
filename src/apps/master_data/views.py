@@ -10,6 +10,7 @@ from .serializers import (
     ApprovalWorkflowSerializer,
     MaterialSerializer,
     SupplierSerializer,
+    SupplierContractPriceSerializer,
     SystemConfigSerializer,
 )
 
@@ -94,3 +95,24 @@ class SystemConfigView(APIView):
     def get(self, request):
         qs = SystemConfig.objects.all()
         return Response({"data": SystemConfigSerializer(qs, many=True).data})
+
+
+class SupplierContractPriceCreateView(APIView):
+    """POST /api/v2/master/suppliers/<id>/contract-prices"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            supplier = Supplier.objects.get(supplier_id=pk, is_active=True)
+        except Supplier.DoesNotExist:
+            return Response({"detail": "Không tìm thấy nhà cung cấp."}, status=404)
+        
+        data = request.data.copy()
+        data["supplier_id"] = supplier.supplier_id
+        
+        serializer = SupplierContractPriceSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        
+        return Response({"message": "Tạo bảng giá khung thành công.", "data": serializer.data}, status=status.HTTP_201_CREATED)
+

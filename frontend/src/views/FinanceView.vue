@@ -152,14 +152,14 @@ const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currenc
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in payments" :key="p.payment_request_id" class="border-b">
-              <td class="px-6 py-3 font-semibold">PAY#{{ p.payment_request_id }}</td>
-              <td class="px-6 py-3 font-bold text-green-600">{{ formatCurrency(p.amount) }}</td>
-              <td class="px-6 py-3">{{ p.status }}</td>
+            <tr v-for="p in payments" :key="p.payment_req_id" class="border-b">
+              <td class="px-6 py-3 font-semibold">{{ p.payment_req_code }}</td>
+              <td class="px-6 py-3 font-bold text-green-600">{{ formatCurrency(p.requested_amount) }}</td>
+              <td class="px-6 py-3">{{ p.req_status }}</td>
               <td class="px-6 py-3 text-right">
-                <BaseButtons v-if="p.status === 'PENDING'" type="justify-end" no-wrap>
-                  <BaseButton color="success" label="Duyệt" small @click="handleProcessPayment(p.payment_request_id, 'APPROVE')" />
-                  <BaseButton color="danger" label="Từ chối" small @click="handleProcessPayment(p.payment_request_id, 'REJECT')" />
+                <BaseButtons v-if="p.req_status === 'PENDING'" type="justify-end" no-wrap>
+                  <BaseButton color="success" label="Duyệt" small @click="handleProcessPayment(p.payment_req_id, 'APPROVE')" />
+                  <BaseButton color="danger" label="Từ chối" small @click="handleProcessPayment(p.payment_req_id, 'REJECT')" />
                 </BaseButtons>
               </td>
             </tr>

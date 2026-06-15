@@ -65,7 +65,8 @@ class IPODetailSerializer(serializers.ModelSerializer):
         fields = [
             "ipo_id", "ipo_code", "version", "is_latest",
             "ipo_status", "total_amount",
-            "supplier_name", "buyer_name",
+            "supplier_id", "supplier_name", 
+            "order_id", "buyer_name",
             "signed_pdf_path", "items",
             "created_at", "updated_at",
         ]

@@ -14,7 +14,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['view', 'submit', 'approve'])
+const emit = defineEmits(['view', 'submit', 'approve', 'edit', 'cancel'])
 
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
@@ -102,6 +102,20 @@ const getStatusColor = (status) => {
                 small
                 label="Xem"
                 @click="emit('view', pr.pr_id)"
+              />
+              <BaseButton
+                v-if="pr.pr_status === 'DRAFT' || pr.pr_status === 'PENDING'"
+                color="info"
+                small
+                label="Sửa"
+                @click="emit('edit', pr.pr_id)"
+              />
+              <BaseButton
+                v-if="pr.pr_status === 'DRAFT' || pr.pr_status === 'PENDING'"
+                color="danger"
+                small
+                label="Hủy"
+                @click="emit('cancel', pr.pr_id)"
               />
               <BaseButton
                 v-if="pr.pr_status === 'DRAFT'"

@@ -6,12 +6,15 @@ from rest_framework.views import APIView
 from core.pagination.standard import StandardResultsPagination
 from core.permissions.rbac import require_permission
 
-from .models import Inventory, WarehouseReceipt, WarehouseReturn
+from .models import Inventory, WarehouseReceipt, WarehouseReturn, StockIssue
 from .serializers import (
     InventorySerializer,
     ReceiptCreateSerializer,
     ReceiptSerializer,
     WarehouseReturnSerializer,
+    IssueCreateSerializer,
+    StockIssueSerializer,
+    ReturnOrderCreateSerializer,
 )
 from .services import WarehouseService
 
@@ -47,7 +50,7 @@ class ReceiptDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            receipt = WarehouseReceipt.objects.select_related("receiver").prefetch_related(
+            receipt = WarehouseReceipt.objects.select_related("warehouse_keeper").prefetch_related(
                 "items"
             ).get(receipt_id=pk)
         except WarehouseReceipt.DoesNotExist:
@@ -60,7 +63,7 @@ class InventoryListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = Inventory.objects.select_related("material__category")
+        qs = Inventory.objects.select_related("material", "branch")
 
         keyword = request.query_params.get("keyword")
         if keyword:
@@ -87,3 +90,70 @@ class WarehouseReturnListView(APIView):
         paginator = StandardResultsPagination()
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(WarehouseReturnSerializer(page, many=True).data)
+
+class WarehouseReturnCreateView(APIView):
+    """POST /api/v2/warehouse/return-orders"""
+    permission_classes = [IsAuthenticated, require_permission("WH_RETURN")]
+
+    def post(self, request):
+        serializer = ReturnOrderCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            return_order = WarehouseService.create_return_order(request.user, serializer.validated_data)
+        except ValueError as exc:
+            return Response({"detail": "Không thể tạo phiếu hoàn trả. Vui lòng kiểm tra lại dữ liệu."}, status=400)
+
+        return Response(
+            {"message": "Tạo phiếu hoàn trả thành công", "data": WarehouseReturnSerializer(return_order).data}, 
+            status=201
+        )
+
+
+class IssueCreateView(APIView):
+    """POST /api/v2/warehouse/issues"""
+    permission_classes = [IsAuthenticated, require_permission("WH_ISSUE")]
+
+    def post(self, request):
+        serializer = IssueCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            issue = WarehouseService.create_issue(request.user, serializer.validated_data)
+        except ValueError as exc:
+            return Response({"detail": "Không thể tạo phiếu xuất kho. Vui lòng kiểm tra lại dữ liệu."}, status=400)
+
+        return Response(
+            {"message": "Xuất kho thành công", "data": StockIssueSerializer(issue).data}, 
+            status=201
+        )
+
+
+class IssueListView(APIView):
+    """GET /api/v2/warehouse/issues"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        qs = StockIssue.objects.select_related("warehouse_keeper", "receiver").prefetch_related("items").order_by("-issued_at")
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(StockIssueSerializer(page, many=True).data)
+
+class IssueConfirmView(APIView):
+    """POST /api/v2/warehouse/issues/<id>/confirm-receipt"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            issue = StockIssue.objects.get(issue_id=pk)
+        except StockIssue.DoesNotExist:
+            return Response({"detail": "Không tìm thấy phiếu xuất kho."}, status=404)
+        
+        # Cập nhật rating nếu có
+        ratings = request.data.get("items_quality_rating", [])
+        if ratings and len(ratings) > 0:
+            rating_val = ratings[0].get("quality_rating", 5)
+            # Cập nhật cho tất cả items của issue
+            issue.items.update(quality_rating=rating_val)
+            
+        return Response({"message": "Đã xác nhận nhận hàng từ phiếu xuất kho."})

@@ -75,4 +75,4 @@ class ApprovalWorkflowSerializer(serializers.ModelSerializer):
 class SystemConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = SystemConfig
-        fields = ["config_id", "config_key", "config_value", "description", "updated_at"]
+        fields = ["config_id", "config_key", "config_value_json", "description", "updated_at"]

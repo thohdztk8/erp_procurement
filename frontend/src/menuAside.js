@@ -15,7 +15,7 @@ export const menuAsideMain = [
   {
     to: '/dashboard',
     icon: mdiMonitor,
-    label: 'Dashboard / Yêu cầu (PR)',
+    label: 'Yêu cầu (PR)',
   },
   {
     to: '/master-data',

@@ -61,5 +61,24 @@ export const prService = {
    */
   async getPendingPRs() {
     return await api.get('/pr/pending-list')
+  },
+
+  /**
+   * Update an existing PR (only in DRAFT/PENDING).
+   * @param {number|string} id - PR ID.
+   * @param {object} data - PR payload.
+   * @returns {Promise<object>} Updated PR.
+   */
+  async updatePR(id, data) {
+    return await api.put(`/pr/${id}`, data)
+  },
+
+  /**
+   * Cancel an existing PR (only in DRAFT/PENDING).
+   * @param {number|string} id - PR ID.
+   * @returns {Promise<object>} Cancel response.
+   */
+  async cancelPR(id) {
+    return await api.delete(`/pr/${id}`)
   }
 }

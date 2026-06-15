@@ -19,13 +19,14 @@ const activeTab = ref('all') // 'all' hoặc 'pending'
 
 const showCreateModal = ref(false)
 const showDetailModal = ref(false)
+const isEditMode = ref(false)
 const prDetailData = ref(null)
 const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 
 const fetchPRs = async () => {
   try {
     const response = await prService.getPRs()
-    prs.value = response.results || []
+    prs.value = response.data.items || []
     
     // Tính toán số liệu thống kê
     stats.value.total = prs.value.length
@@ -79,10 +80,38 @@ const handleApprove = async (payload) => {
   }
 }
 
+const handleEdit = async (id) => {
+  try {
+    const res = await prService.getPRDetail(id)
+    prDetailData.value = res.data.pr
+    isEditMode.value = true
+    showCreateModal.value = true
+  } catch (error) {
+    alert('Không lấy được chi tiết đơn PR để sửa.')
+  }
+}
+
+const handleCancel = async (id) => {
+  if (confirm('Bạn chắc chắn muốn hủy đơn PR này?')) {
+    try {
+      await prService.cancelPR(id)
+      fetchPRs()
+    } catch (e) {
+      alert('Hủy đơn PR thất bại.')
+    }
+  }
+}
+
 const handleSavePR = async (formData) => {
   try {
-    await prService.createPR(formData)
+    if (isEditMode.value && prDetailData.value) {
+      await prService.updatePR(prDetailData.value.pr_id, formData)
+    } else {
+      await prService.createPR(formData)
+    }
     showCreateModal.value = false
+    isEditMode.value = false
+    prDetailData.value = null
     fetchPRs()
   } catch (e) {
     alert('Lưu PR thất bại. Vui lòng kiểm tra lại thông tin.')
@@ -111,7 +140,7 @@ const isApproverRole = computed(() => {
           color="contrast"
           rounded-full
           small
-          @click="showCreateModal = true"
+          @click="showCreateModal = true; isEditMode = false; prDetailData = null"
         />
       </SectionTitleLineWithButton>
 
@@ -151,6 +180,8 @@ const isApproverRole = computed(() => {
           @view="handleView" 
           @submit="handleSubmit" 
           @approve="handleView" 
+          @edit="handleEdit"
+          @cancel="handleCancel"
         />
         <PRTable 
           v-else 
@@ -159,6 +190,8 @@ const isApproverRole = computed(() => {
           @view="handleView" 
           @submit="handleSubmit" 
           @approve="handleView" 
+          @edit="handleEdit"
+          @cancel="handleCancel"
         />
       </CardBox>
     </SectionMain>
@@ -166,7 +199,9 @@ const isApproverRole = computed(() => {
     <!-- Modals -->
     <PRCreateModal 
       v-if="showCreateModal" 
-      @close="showCreateModal = false" 
+      :edit-mode="isEditMode"
+      :pr-data="prDetailData"
+      @close="showCreateModal = false; isEditMode = false; prDetailData = null" 
       @save="handleSavePR" 
     />
     

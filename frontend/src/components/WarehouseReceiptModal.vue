@@ -6,6 +6,7 @@ import BaseButtons from '@/components/BaseButtons.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
 import { ipoService, warehouseService } from '@/services/api'
+import api from '@/services/client'
 
 const emit = defineEmits(['close', 'saved'])
 
@@ -26,8 +27,21 @@ const fetchApprovedIpos = async () => {
   }
 }
 
+const branches = ref([])
+const selectedBranchId = ref(null)
+
+const fetchBranches = async () => {
+  try {
+    const res = await api.get('/auth/branches')
+    branches.value = res.data || []
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 onMounted(() => {
   fetchApprovedIpos()
+  fetchBranches()
 })
 
 const handleIpoChange = async () => {
@@ -43,12 +57,13 @@ const handleIpoChange = async () => {
     if (selectedIpo.value) {
       formItems.value = selectedIpo.value.items.map(it => ({
         ipo_item_id: it.ipo_item_id,
-        material_name: it.material_name || it.material?.material_name,
+        material_id: it.order_item?.material_id || it.material_id,
+        material_name_other: it.order_item?.material_name_other || it.material_name_other,
+        material_name: it.material_name || it.material?.material_name || it.order_item?.material?.material_name || 'Khác',
         qty_max: parseFloat(it.qty),
         qty_received: parseFloat(it.qty),
         qty_passed: parseFloat(it.qty),
         qty_failed: 0,
-        failure_reason: '',
         photo_paths: []
       }))
     }
@@ -70,14 +85,16 @@ const handleSubmit = async () => {
   try {
     const payload = {
       ipo_id: selectedIpoId.value,
+      branch_id: selectedBranchId.value,
       notes: notes.value,
       items: formItems.value.map(it => ({
-        ipo_item_id: it.ipo_item_id,
+        material_id: it.material_id || null,
+        material_name_other: it.material_name_other || '',
+        qty_ordered: it.qty_max,
         qty_received: it.qty_received,
         qty_passed: it.qty_passed,
         qty_failed: it.qty_failed,
-        photo_paths: it.photo_paths,
-        failure_reason: it.failure_reason
+        photo_paths: it.photo_paths
       }))
     }
     
@@ -111,6 +128,13 @@ const handleSubmit = async () => {
               type="select" 
               :options="approvedIpos.map(i => ({ id: i.ipo_id, label: `${i.ipo_code} (Trị giá thầu: ${i.total_amount})` }))"
               @change="handleIpoChange"
+            />
+          </FormField>
+          <FormField label="Chọn Chi nhánh nhập kho">
+            <FormControl 
+              v-model="selectedBranchId" 
+              type="select" 
+              :options="branches.map(b => ({ id: b.branch_id, label: b.branch_name }))"
             />
           </FormField>
           <FormField label="Ghi chú phiếu nhập">
@@ -154,7 +178,7 @@ const handleSubmit = async () => {
       <div class="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-800">
         <BaseButtons>
           <BaseButton color="white" label="Hủy" @click="emit('close')" />
-          <BaseButton color="success" label="Xác nhận Nhập kho" :disabled="isSubmitting || formItems.length === 0" @click="handleSubmit" />
+          <BaseButton color="success" label="Xác nhận Nhập kho" :disabled="isSubmitting || formItems.length === 0 || !selectedBranchId" @click="handleSubmit" />
         </BaseButtons>
       </div>
     </div>

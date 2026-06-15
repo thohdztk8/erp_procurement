@@ -71,3 +71,59 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_permissions(self, obj) -> list[str]:
         return obj.get_permission_codes()
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import Role
+        model = Role
+        fields = ["role_id", "role_code", "role_name", "description", "is_active"]
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        from .models import Permission
+        model = Permission
+        fields = ["permission_id", "permission_code", "permission_name", "module_group"]
+
+
+class UserSerializer(serializers.ModelSerializer):
+    role_name = serializers.CharField(source="role.role_name", read_only=True)
+    role_code = serializers.CharField(source="role.role_code", read_only=True)
+    branch_name = serializers.CharField(source="branch.branch_name", read_only=True)
+    dept_name = serializers.CharField(source="dept.dept_name", read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "user_id", "username", "full_name", "email", "phone",
+            "role_id", "role_name", "role_code", "branch_id", "branch_name", 
+            "dept_id", "dept_name", "is_active"
+        ]
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "username", "full_name", "email", "phone",
+            "role", "branch", "dept", "password"
+        ]
+        
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User.objects.create(**validated_data)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+        return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["full_name", "email", "phone", "role", "branch", "dept", "is_active"]

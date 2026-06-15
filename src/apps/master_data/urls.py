@@ -6,6 +6,7 @@ from .views import (
     MaterialListView,
     SupplierDetailView,
     SupplierListView,
+    SupplierContractPriceCreateView,
     SystemConfigView,
 )
 
@@ -15,6 +16,7 @@ urlpatterns = [
     path("materials/<int:pk>", MaterialDetailView.as_view(), name="material-detail"),
     path("suppliers", SupplierListView.as_view(), name="supplier-list"),
     path("suppliers/<int:pk>", SupplierDetailView.as_view(), name="supplier-detail"),
+    path("suppliers/<int:pk>/contract-prices", SupplierContractPriceCreateView.as_view(), name="supplier-contract-price"),
     path("approval-workflows", ApprovalWorkflowListView.as_view(), name="approval-workflow-list"),
     path("configs", SystemConfigView.as_view(), name="system-config"),
 ]

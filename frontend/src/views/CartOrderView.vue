@@ -10,13 +10,18 @@ import FormControl from '@/components/FormControl.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
 import PODetailModal from '@/components/PODetailModal.vue'
+import CartDetailModal from '@/components/CartDetailModal.vue'
 import { prService, cartOrderService } from '@/services/api'
 
 const activeTab = ref('create-po')
 const approvedPrItems = ref([])
+const carts = ref([])
 const orders = ref([])
 const selectedItems = ref([])
 const cartTitle = ref('')
+
+const showCartDetailModal = ref(false)
+const selectedCartId = ref(null)
 
 const showDetailModal = ref(false)
 const selectedOrderId = ref(null)
@@ -46,7 +51,11 @@ const fetchData = async () => {
     }
     approvedPrItems.value = items
 
-    // 2. Lấy danh sách PO
+    // 2. Lấy danh sách Giỏ hàng
+    const cartRes = await cartOrderService.getCarts()
+    carts.value = cartRes.results || []
+
+    // 3. Lấy danh sách PO
     const orderRes = await cartOrderService.getOrders()
     orders.value = orderRes.results || []
   } catch (error) {
@@ -76,16 +85,14 @@ const handleCreatePO = async () => {
       pr_item_ids: selectedItems.value
     })
     
-    // 2. Chuyển giỏ hàng thành PO ngay lập tức
-    const orderRes = await cartOrderService.convertCartToOrder(cartRes.data.cart_id)
-    alert(`Đã gom hàng thành công và tạo Đơn mua hàng (PO) số: ${orderRes.data.order_code}`)
+    alert('Đã gom hàng thành công vào giỏ: ' + cartTitle.value)
     
     cartTitle.value = ''
     selectedItems.value = []
-    activeTab.value = 'po-list'
+    activeTab.value = 'cart-list'
     fetchData()
   } catch (error) {
-    alert('Gom hàng tạo PO thất bại. ' + (error.response?.data?.detail || ''))
+    alert('Gom hàng thất bại. ' + (error.response?.data?.detail || ''))
   } finally {
     isSubmitting.value = false
   }
@@ -94,6 +101,17 @@ const handleCreatePO = async () => {
 const openPODetail = (id) => {
   selectedOrderId.value = id
   showDetailModal.value = true
+}
+
+const openCartDetail = (id) => {
+  selectedCartId.value = id
+  showCartDetailModal.value = true
+}
+
+const handleCartConverted = () => {
+  showCartDetailModal.value = false
+  activeTab.value = 'po-list'
+  fetchData()
 }
 </script>
 
@@ -109,7 +127,14 @@ const openPODetail = (id) => {
           :class="activeTab === 'create-po' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
           @click="activeTab = 'create-po'"
         >
-          Gom hàng tạo PO ({{ approvedPrItems.length }})
+          Gom hàng ({{ approvedPrItems.length }})
+        </button>
+        <button 
+          class="pb-2 px-4 text-sm font-semibold transition"
+          :class="activeTab === 'cart-list' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+          @click="activeTab = 'cart-list'"
+        >
+          Giỏ hàng ({{ carts.length }})
         </button>
         <button 
           class="pb-2 px-4 text-sm font-semibold transition"
@@ -130,7 +155,7 @@ const openPODetail = (id) => {
             </FormField>
             <BaseButton 
               color="success" 
-              label="Tạo PO từ mục đã chọn" 
+              label="Tạo Giỏ hàng" 
               :disabled="isSubmitting" 
               @click="handleCreatePO" 
             />
@@ -168,7 +193,38 @@ const openPODetail = (id) => {
         </CardBox>
       </div>
 
-      <!-- Tab 2: Danh sách Đơn mua (PO) -->
+      <!-- Tab 2: Danh sách Giỏ hàng -->
+      <div v-else-if="activeTab === 'cart-list'">
+        <CardBox has-table>
+          <table class="w-full text-xs text-left">
+            <thead class="bg-gray-100 dark:bg-gray-800">
+              <tr>
+                <th class="px-6 py-3">ID Giỏ hàng</th>
+                <th class="px-6 py-3">Tên tiêu đề</th>
+                <th class="px-6 py-3">Người mua (Buyer)</th>
+                <th class="px-6 py-3">Ngày lập</th>
+                <th class="px-6 py-3 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="c in carts" :key="c.cart_id" class="border-b">
+                <td class="px-6 py-3 font-semibold">{{ c.cart_id }}</td>
+                <td class="px-6 py-3">{{ c.cart_title }}</td>
+                <td class="px-6 py-3">{{ c.buyer_name }}</td>
+                <td class="px-6 py-3">{{ new Date(c.created_at).toLocaleDateString('vi-VN') }}</td>
+                <td class="px-6 py-3 text-right">
+                  <BaseButton color="info" :icon="mdiEye" label="Sửa & Tạo PO" small @click="openCartDetail(c.cart_id)" />
+                </td>
+              </tr>
+              <tr v-if="carts.length === 0">
+                <td colspan="5" class="text-center py-8 text-gray-400">Không có giỏ hàng nào.</td>
+              </tr>
+            </tbody>
+          </table>
+        </CardBox>
+      </div>
+
+      <!-- Tab 3: Danh sách Đơn mua (PO) -->
       <div v-else>
         <CardBox has-table>
           <table class="w-full text-xs text-left">
@@ -207,6 +263,14 @@ const openPODetail = (id) => {
       :order-id="selectedOrderId" 
       @close="showDetailModal = false" 
       @updated="fetchData" 
+    />
+
+    <CartDetailModal
+      v-if="showCartDetailModal"
+      :cart-id="selectedCartId"
+      @close="showCartDetailModal = false"
+      @updated="fetchData"
+      @converted="handleCartConverted"
     />
   </LayoutAuthenticated>
 </template>
