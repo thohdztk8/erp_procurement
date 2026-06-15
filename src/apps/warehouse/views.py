@@ -102,7 +102,7 @@ class WarehouseReturnCreateView(APIView):
         try:
             return_order = WarehouseService.create_return_order(request.user, serializer.validated_data)
         except ValueError as exc:
-            return Response({"detail": str(exc)}, status=400)
+            return Response({"detail": "Không thể tạo phiếu hoàn trả. Vui lòng kiểm tra lại dữ liệu."}, status=400)
 
         return Response(
             {"message": "Tạo phiếu hoàn trả thành công", "data": WarehouseReturnSerializer(return_order).data}, 
@@ -121,7 +121,7 @@ class IssueCreateView(APIView):
         try:
             issue = WarehouseService.create_issue(request.user, serializer.validated_data)
         except ValueError as exc:
-            return Response({"detail": str(exc)}, status=400)
+            return Response({"detail": "Không thể tạo phiếu xuất kho. Vui lòng kiểm tra lại dữ liệu."}, status=400)
 
         return Response(
             {"message": "Xuất kho thành công", "data": StockIssueSerializer(issue).data}, 
