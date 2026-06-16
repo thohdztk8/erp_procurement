@@ -47,7 +47,7 @@ class MatchingService:
 
     @staticmethod
     @transaction.atomic
-    def run_three_way_matching(invoice: Invoice, user) -> ThreeWayMatchingResult:
+    def run_three_way_matching(invoice: Invoice, user) -> InvoiceMatchingResult:
         """
         Thuật toán đối soát 3 chiều:
         1. Hóa đơn tài chính: qty_invoice, price_invoice
@@ -103,7 +103,7 @@ class MatchingService:
             ).first()
         )
 
-        matching = ThreeWayMatchingResult.objects.update_or_create(
+        matching = InvoiceMatchingResult.objects.update_or_create(
             invoice=invoice,
             defaults={
                 "invoice_item": first["invoice_item"],
@@ -133,7 +133,7 @@ class MatchingService:
 
     @staticmethod
     @transaction.atomic
-    def override_matching(invoice: Invoice, user, override_note: str) -> ThreeWayMatchingResult:
+    def override_matching(invoice: Invoice, user, override_note: str) -> InvoiceMatchingResult:
         """
         Ban Giám đốc override sai lệch — bắt buộc ghi lý do.
         Chỉ role có permission OVERRIDE_MATCHING mới được gọi.
