@@ -180,6 +180,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[Ca
 GO
 
 CREATE TABLE [dbo].[CartPRItems] (
+  [id] int IDENTITY(1,1) NOT NULL,
   [cart_id] int  NOT NULL,
   [pr_item_id] int  NOT NULL,
   [qty_in_cart] decimal(18,4)  NOT NULL,
@@ -695,6 +696,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[Or
 GO
 
 CREATE TABLE [dbo].[OrderItemPRLinks] (
+  [id] int IDENTITY(1,1) NOT NULL,
   [order_item_id] int  NOT NULL,
   [pr_item_id] int  NOT NULL,
   [qty_linked] decimal(18,4)  NOT NULL
@@ -753,8 +755,12 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[Or
 GO
 
 CREATE TABLE [dbo].[OrderSuppliers] (
+  [id] int IDENTITY(1,1) NOT NULL,
   [order_id] int  NOT NULL,
   [supplier_id] int  NOT NULL,
+  [custom_contact_name] nvarchar(150) COLLATE Vietnamese_CI_AS  NULL,
+  [custom_contact_email] nvarchar(254) COLLATE Vietnamese_CI_AS  NULL,
+  [custom_contact_phone] nvarchar(50) COLLATE Vietnamese_CI_AS  NULL,
   [assigned_at] datetime2(7) DEFAULT getdate() NOT NULL
 )
 GO
@@ -1565,9 +1571,12 @@ GO
 -- ----------------------------
 -- Primary Key structure for table CartPRItems
 -- ----------------------------
-ALTER TABLE [dbo].[CartPRItems] ADD CONSTRAINT [PK_CartPRItems] PRIMARY KEY CLUSTERED ([cart_id], [pr_item_id])
+ALTER TABLE [dbo].[CartPRItems] ADD CONSTRAINT [PK_CartPRItems] PRIMARY KEY CLUSTERED ([id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[CartPRItems] ADD CONSTRAINT [UQ_CartPRItems] UNIQUE NONCLUSTERED ([cart_id] ASC, [pr_item_id] ASC)
 GO
 
 
@@ -2267,9 +2276,12 @@ GO
 -- ----------------------------
 -- Primary Key structure for table OrderItemPRLinks
 -- ----------------------------
-ALTER TABLE [dbo].[OrderItemPRLinks] ADD CONSTRAINT [PK_OrderItemPRLinks] PRIMARY KEY CLUSTERED ([order_item_id], [pr_item_id])
+ALTER TABLE [dbo].[OrderItemPRLinks] ADD CONSTRAINT [PK_OrderItemPRLinks] PRIMARY KEY CLUSTERED ([id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[OrderItemPRLinks] ADD CONSTRAINT [UQ_OrderItemPRLinks] UNIQUE NONCLUSTERED ([order_item_id] ASC, [pr_item_id] ASC)
 GO
 
 
@@ -2334,9 +2346,12 @@ GO
 -- ----------------------------
 -- Primary Key structure for table OrderSuppliers
 -- ----------------------------
-ALTER TABLE [dbo].[OrderSuppliers] ADD CONSTRAINT [PK_OrderSuppliers] PRIMARY KEY CLUSTERED ([order_id], [supplier_id])
+ALTER TABLE [dbo].[OrderSuppliers] ADD CONSTRAINT [PK_OrderSuppliers] PRIMARY KEY CLUSTERED ([id])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[OrderSuppliers] ADD CONSTRAINT [UQ_OrderSuppliers] UNIQUE NONCLUSTERED ([order_id] ASC, [supplier_id] ASC)
 GO
 
 
