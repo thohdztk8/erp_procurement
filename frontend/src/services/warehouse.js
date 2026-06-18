@@ -17,8 +17,8 @@ export const warehouseService = {
    * Get list of receipts.
    * @returns {Promise<object>}
    */
-  async getReceipts() {
-    return await api.get('/warehouse/receipts')
+  async getReceipts(params = {}) {
+    return await api.get('/warehouse/receipts', { params })
   },
 
   /**
@@ -34,8 +34,8 @@ export const warehouseService = {
    * Get current stock inventory.
    * @returns {Promise<object>}
    */
-  async getInventory() {
-    return await api.get('/warehouse/inventory')
+  async getInventory(params = {}) {
+    return await api.get('/warehouse/inventory', { params })
   },
 
   /**
@@ -51,8 +51,8 @@ export const warehouseService = {
    * Get list of internal issues.
    * @returns {Promise<object>}
    */
-  async getIssues() {
-    return await api.get('/warehouse/issues')
+  async getIssues(params = {}) {
+    return await api.get('/warehouse/issues', { params })
   },
 
   /**
@@ -78,8 +78,8 @@ export const warehouseService = {
    * Get return orders list.
    * @returns {Promise<object>}
    */
-  async getReturnOrders() {
-    return await api.get('/warehouse/return-orders')
+  async getReturnOrders(params = {}) {
+    return await api.get('/warehouse/return-orders', { params })
   },
 
   /**

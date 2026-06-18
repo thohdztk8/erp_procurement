@@ -17,8 +17,8 @@ export const cartOrderService = {
    * Get list of carts.
    * @returns {Promise<object>}
    */
-  async getCarts() {
-    return await api.get('/cart/')
+  async getCarts(params = {}) {
+    return await api.get('/cart/', { params })
   },
 
   /**
@@ -62,8 +62,8 @@ export const cartOrderService = {
    * Get orders list.
    * @returns {Promise<object>}
    */
-  async getOrders() {
-    return await api.get('/cart/orders')
+  async getOrders(params = {}) {
+    return await api.get('/cart/orders', { params })
   },
 
   /**

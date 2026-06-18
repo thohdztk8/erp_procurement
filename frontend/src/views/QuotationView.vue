@@ -22,7 +22,7 @@ const isLoading = ref(false)
 const fetchOrders = async () => {
   try {
     const res = await cartOrderService.getOrders()
-    orders.value = res.results || []
+    orders.value = res.data?.items || []
   } catch (error) {
     console.error(error)
   }

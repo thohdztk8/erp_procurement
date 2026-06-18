@@ -7,6 +7,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import BaseButtons from '@/components/BaseButtons.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { masterService } from '@/services/api'
 import UserManageModal from '@/components/UserManageModal.vue'
 import MaterialCreateModal from '@/components/MaterialCreateModal.vue'
@@ -19,6 +20,18 @@ const materials = ref([])
 const suppliers = ref([])
 const users = ref([])
 const isLoading = ref(false)
+
+const materialPage = ref(1)
+const materialTotalPages = ref(1)
+const materialTotalItems = ref(0)
+
+const supplierPage = ref(1)
+const supplierTotalPages = ref(1)
+const supplierTotalItems = ref(0)
+
+const userPage = ref(1)
+const userTotalPages = ref(1)
+const userTotalItems = ref(0)
 
 const showUserModal = ref(false)
 const showMaterialModal = ref(false)
@@ -34,15 +47,21 @@ const isAdmin = ref(currentUser.value.role_code === 'ADMIN' || currentUser.value
 const fetchData = async () => {
   isLoading.value = true
   try {
-    const matRes = await masterService.getMaterials()
+    const matRes = await masterService.getMaterials({ page: materialPage.value })
     materials.value = matRes.data.items || []
+    materialTotalPages.value = matRes.data.pagination?.total_pages || 1
+    materialTotalItems.value = matRes.data.pagination?.total_items || 0
     
-    const supRes = await masterService.getSuppliers()
+    const supRes = await masterService.getSuppliers({ page: supplierPage.value })
     suppliers.value = supRes.data.items || []
+    supplierTotalPages.value = supRes.data.pagination?.total_pages || 1
+    supplierTotalItems.value = supRes.data.pagination?.total_items || 0
 
     if (isAdmin.value) {
-      const userRes = await masterService.getUsers()
+      const userRes = await masterService.getUsers({ page: userPage.value })
       users.value = userRes.data.items || []
+      userTotalPages.value = userRes.data.pagination?.total_pages || 1
+      userTotalItems.value = userRes.data.pagination?.total_items || 0
     }
   } catch (error) {
     console.error('Lỗi khi tải dữ liệu gốc:', error)
@@ -98,6 +117,21 @@ const handleSavePrice = async (data) => {
     alert('Không thể lưu bảng giá khung.')
   }
 }
+
+const changeMaterialPage = (page) => {
+  materialPage.value = page
+  fetchData()
+}
+
+const changeSupplierPage = (page) => {
+  supplierPage.value = page
+  fetchData()
+}
+
+const changeUserPage = (page) => {
+  userPage.value = page
+  fetchData()
+}
 </script>
 
 <template>
@@ -138,14 +172,14 @@ const handleSavePrice = async (data) => {
           :class="activeTab === 'materials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
           @click="activeTab = 'materials'"
         >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiBallotOutline" /> Danh mục vật tư ({{ materials.length }})</span>
+          <span class="flex items-center gap-1"><BaseIcon :path="mdiBallotOutline" /> Danh mục vật tư ({{ materialTotalItems }})</span>
         </button>
         <button 
           class="pb-2 px-4 text-sm font-semibold transition"
           :class="activeTab === 'suppliers' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
           @click="activeTab = 'suppliers'"
         >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountMultiple" /> Nhà cung cấp ({{ suppliers.length }})</span>
+          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountMultiple" /> Nhà cung cấp ({{ supplierTotalItems }})</span>
         </button>
         <button 
           v-if="isAdmin"
@@ -153,7 +187,7 @@ const handleSavePrice = async (data) => {
           :class="activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
           @click="activeTab = 'users'"
         >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountLock" /> Quản lý tài khoản & Quyền ({{ users.length }})</span>
+          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountLock" /> Quản lý tài khoản & Quyền ({{ userTotalItems }})</span>
         </button>
       </div>
 
@@ -177,6 +211,12 @@ const handleSavePrice = async (data) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="materialPage"
+          :total-pages="materialTotalPages"
+          :total-items="materialTotalItems"
+          @change-page="changeMaterialPage"
+        />
       </CardBox>
 
       <!-- Bảng Nhà Cung Cấp -->
@@ -203,6 +243,12 @@ const handleSavePrice = async (data) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="supplierPage"
+          :total-pages="supplierTotalPages"
+          :total-items="supplierTotalItems"
+          @change-page="changeSupplierPage"
+        />
       </CardBox>
 
       <!-- Bảng Tài Khoản Người Dùng -->
@@ -235,6 +281,12 @@ const handleSavePrice = async (data) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="userPage"
+          :total-pages="userTotalPages"
+          :total-items="userTotalItems"
+          @change-page="changeUserPage"
+        />
       </CardBox>
     </SectionMain>
 

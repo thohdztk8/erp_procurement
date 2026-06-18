@@ -9,11 +9,8 @@ export const prService = {
    * @param {string} [status] - Filter by status.
    * @returns {Promise<object>} List of PRs.
    */
-  async getPRs(status) {
-    const params = {}
-    if (status) {
-      params.status = status
-    }
+  async getPRs(paramsOrStatus = {}) {
+    const params = typeof paramsOrStatus === 'string' ? { status: paramsOrStatus } : paramsOrStatus
     return await api.get('/pr/', { params })
   },
 
@@ -59,8 +56,8 @@ export const prService = {
    * Get list of PRs pending current user's approval.
    * @returns {Promise<object>} Pending PRs.
    */
-  async getPendingPRs() {
-    return await api.get('/pr/pending-list')
+  async getPendingPRs(params = {}) {
+    return await api.get('/pr/pending-list', { params })
   },
 
   /**

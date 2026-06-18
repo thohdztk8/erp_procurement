@@ -10,6 +10,7 @@ import WarehouseReceiptModal from '@/components/WarehouseReceiptModal.vue'
 import WarehouseIssueModal from '@/components/WarehouseIssueModal.vue'
 import WarehouseReturnModal from '@/components/WarehouseReturnModal.vue'
 import StockMovementModal from '@/components/StockMovementModal.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { warehouseService } from '@/services/api'
 
 const activeTab = ref('inventory')
@@ -17,6 +18,23 @@ const inventory = ref([])
 const receipts = ref([])
 const issues = ref([])
 const returns = ref([])
+
+const inventoryPage = ref(1)
+const inventoryTotalPages = ref(1)
+const inventoryTotalItems = ref(0)
+
+const receiptPage = ref(1)
+const receiptTotalPages = ref(1)
+const receiptTotalItems = ref(0)
+
+const issuePage = ref(1)
+const issueTotalPages = ref(1)
+const issueTotalItems = ref(0)
+
+const returnPage = ref(1)
+const returnTotalPages = ref(1)
+const returnTotalItems = ref(0)
+
 const showReceiptModal = ref(false)
 const showIssueModal = ref(false)
 const showReturnModal = ref(false)
@@ -25,14 +43,25 @@ const selectedMaterial = ref(null)
 
 const fetchData = async () => {
   try {
-    const invRes = await warehouseService.getInventory()
-    inventory.value = invRes.results || []
-    const recRes = await warehouseService.getReceipts()
-    receipts.value = recRes.results || []
-    const issRes = await warehouseService.getIssues()
-    issues.value = issRes.results || []
-    const retRes = await warehouseService.getReturnOrders()
-    returns.value = retRes.results || []
+    const invRes = await warehouseService.getInventory({ page: inventoryPage.value })
+    inventory.value = invRes.data.items || []
+    inventoryTotalPages.value = invRes.data.pagination?.total_pages || 1
+    inventoryTotalItems.value = invRes.data.pagination?.total_items || 0
+
+    const recRes = await warehouseService.getReceipts({ page: receiptPage.value })
+    receipts.value = recRes.data.items || []
+    receiptTotalPages.value = recRes.data.pagination?.total_pages || 1
+    receiptTotalItems.value = recRes.data.pagination?.total_items || 0
+
+    const issRes = await warehouseService.getIssues({ page: issuePage.value })
+    issues.value = issRes.data.items || []
+    issueTotalPages.value = issRes.data.pagination?.total_pages || 1
+    issueTotalItems.value = issRes.data.pagination?.total_items || 0
+
+    const retRes = await warehouseService.getReturnOrders({ page: returnPage.value })
+    returns.value = retRes.data.items || []
+    returnTotalPages.value = retRes.data.pagination?.total_pages || 1
+    returnTotalItems.value = retRes.data.pagination?.total_items || 0
   } catch (error) {
     console.error(error)
   }
@@ -81,6 +110,23 @@ const handleUpdateReturnStatus = async (returnId) => {
     alert('Cập nhật trạng thái thất bại.')
   }
 }
+
+const changeInventoryPage = (page) => {
+  inventoryPage.value = page
+  fetchData()
+}
+const changeReceiptPage = (page) => {
+  receiptPage.value = page
+  fetchData()
+}
+const changeIssuePage = (page) => {
+  issuePage.value = page
+  fetchData()
+}
+const changeReturnPage = (page) => {
+  returnPage.value = page
+  fetchData()
+}
 </script>
 
 <template>
@@ -122,6 +168,12 @@ const handleUpdateReturnStatus = async (returnId) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="inventoryPage"
+          :total-pages="inventoryTotalPages"
+          :total-items="inventoryTotalItems"
+          @change-page="changeInventoryPage"
+        />
       </CardBox>
 
       <CardBox v-else-if="activeTab === 'receipts'" has-table class="mb-6">
@@ -143,6 +195,12 @@ const handleUpdateReturnStatus = async (returnId) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="receiptPage"
+          :total-pages="receiptTotalPages"
+          :total-items="receiptTotalItems"
+          @change-page="changeReceiptPage"
+        />
       </CardBox>
 
       <CardBox v-else-if="activeTab === 'issues'" has-table class="mb-6">
@@ -167,6 +225,12 @@ const handleUpdateReturnStatus = async (returnId) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="issuePage"
+          :total-pages="issueTotalPages"
+          :total-items="issueTotalItems"
+          @change-page="changeIssuePage"
+        />
       </CardBox>
 
       <CardBox v-else-if="activeTab === 'returns'" has-table class="mb-6">
@@ -191,6 +255,12 @@ const handleUpdateReturnStatus = async (returnId) => {
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="returnPage"
+          :total-pages="returnTotalPages"
+          :total-items="returnTotalItems"
+          @change-page="changeReturnPage"
+        />
       </CardBox>
     </SectionMain>
 

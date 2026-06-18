@@ -8,8 +8,8 @@ export const masterService = {
    * Get materials list.
    * @returns {Promise<object>} Materials.
    */
-  async getMaterials() {
-    return await api.get('/master/materials')
+  async getMaterials(params = {}) {
+    return await api.get('/master/materials', { params })
   },
 
   /**
@@ -25,8 +25,8 @@ export const masterService = {
    * Get suppliers list.
    * @returns {Promise<object>} Suppliers.
    */
-  async getSuppliers() {
-    return await api.get('/master/suppliers')
+  async getSuppliers(params = {}) {
+    return await api.get('/master/suppliers', { params })
   },
 
   /**
@@ -52,8 +52,8 @@ export const masterService = {
    * Get internal users list.
    * @returns {Promise<object>} Users.
    */
-  async getUsers() {
-    return await api.get('/auth/users')
+  async getUsers(params = {}) {
+    return await api.get('/auth/users', { params })
   },
 
   /**

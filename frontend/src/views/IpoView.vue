@@ -8,10 +8,16 @@ import BaseButtons from '@/components/BaseButtons.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
 import IPODetailModal from '@/components/IPODetailModal.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { ipoService } from '@/services/api'
 
 const ipos = ref([])
 const activeTab = ref('all') // 'all' or 'pending'
+
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
+
 const showDetailModal = ref(false)
 const selectedIpoId = ref(null)
 const showApproveForm = ref(false)
@@ -19,8 +25,14 @@ const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 
 const fetchIPOs = async () => {
   try {
-    const res = await ipoService.getIPOs()
-    ipos.value = res.results || []
+    const params = { page: currentPage.value }
+    if (activeTab.value === 'pending') {
+      params.status = 'PENDING'
+    }
+    const res = await ipoService.getIPOs(params)
+    ipos.value = res.data.items || []
+    totalPages.value = res.data.pagination?.total_pages || 1
+    totalItems.value = res.data.pagination?.total_items || 0
   } catch (error) {
     console.error(error)
   }
@@ -51,12 +63,16 @@ const isApproverRole = computed(() => {
   return currentUser.value.permissions?.includes('IPO_APPROVE') || currentUser.value.username === 'admin'
 })
 
-const filteredIPOs = computed(() => {
-  if (activeTab.value === 'all') {
-    return ipos.value
-  }
-  return ipos.value.filter(i => i.ipo_status === 'PENDING')
-})
+const changeTab = (tab) => {
+  activeTab.value = tab
+  currentPage.value = 1
+  fetchIPOs()
+}
+
+const changePage = (page) => {
+  currentPage.value = page
+  fetchIPOs()
+}
 
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
@@ -73,17 +89,17 @@ const formatCurrency = (val) => {
         <button 
           class="pb-2 px-4 text-sm font-semibold transition"
           :class="activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'all'"
+          @click="changeTab('all')"
         >
-          Tất cả hợp đồng ({{ ipos.length }})
+          Tất cả hợp đồng ({{ activeTab === 'all' ? totalItems : ipos.length }})
         </button>
         <button 
           v-if="isApproverRole"
           class="pb-2 px-4 text-sm font-semibold transition"
           :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'pending'"
+          @click="changeTab('pending')"
         >
-          Chờ phê duyệt ({{ ipos.filter(i => i.ipo_status === 'PENDING').length }})
+          Chờ phê duyệt ({{ activeTab === 'pending' ? totalItems : ipos.filter(i => i.ipo_status === 'PENDING').length }})
         </button>
       </div>
 
@@ -100,7 +116,7 @@ const formatCurrency = (val) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="i in filteredIPOs" :key="i.ipo_id" class="border-b">
+            <tr v-for="i in ipos" :key="i.ipo_id" class="border-b">
               <td class="px-6 py-3 font-semibold">{{ i.ipo_code }}</td>
               <td class="px-6 py-3 font-bold text-green-600">{{ formatCurrency(i.total_amount) }}</td>
               <td class="px-6 py-3 font-semibold text-blue-600">{{ i.ipo_status }}</td>
@@ -126,11 +142,17 @@ const formatCurrency = (val) => {
                 </BaseButtons>
               </td>
             </tr>
-            <tr v-if="filteredIPOs.length === 0">
+            <tr v-if="ipos.length === 0">
               <td colspan="5" class="text-center py-8 text-gray-400">Không tìm thấy hợp đồng nào.</td>
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total-items="totalItems"
+          @change-page="changePage"
+        />
       </CardBox>
     </SectionMain>
 
