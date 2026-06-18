@@ -2022,7 +2022,7 @@ GO
 ALTER TABLE [dbo].[EmailTemplates] ADD CONSTRAINT [CK_EmailTemplates_Channel] CHECK ([channel]='SMS' OR [channel]='IN_APP' OR [channel]='EMAIL')
 GO
 
-ALTER TABLE [dbo].[EmailTemplates] ADD CONSTRAINT [CK_EmailTemplates_BodyRequired] CHECK ([body_html] IS NOT NULL OR [body_plain_text] IS NOT NULL)
+ALTER TABLE [dbo].[EmailTemplates] ADD CONSTRAINT [CK_EmailTemplates_BodyRequired] CHECK ([body_html] IS NOT NULL OR [body] IS NOT NULL)
 GO
 
 

@@ -34,18 +34,24 @@ GO
 -- ============================================================
 PRINT '>> [1/8] Seeding Branches...';
 
+SET IDENTITY_INSERT dbo.Branches ON;
+GO
+
 MERGE dbo.Branches AS tgt
 USING (VALUES
-    ('CN-HN',  N'Chi nhánh Hà Nội',          N'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội'),
-    ('CN-HCM', N'Chi nhánh TP. Hồ Chí Minh', N'18 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh'),
-    ('CN-DN',  N'Chi nhánh Đà Nẵng',         N'88 Điện Biên Phủ, Thanh Khê, Đà Nẵng'),
-    ('CN-BPC', N'Nhà máy Bình Phước',         N'KCN Minh Hưng III, Chơn Thành, Bình Phước'),
-    ('CN-HPH', N'Nhà máy Hải Phòng',          N'KCN Đình Vũ, Hải An, Hải Phòng')
-) AS src (branch_code, branch_name, address)
+    (1, 'CN-HN',  N'Chi nhánh Hà Nội',          N'Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội'),
+    (2, 'CN-HCM', N'Chi nhánh TP. Hồ Chí Minh', N'18 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh'),
+    (3, 'CN-DN',  N'Chi nhánh Đà Nẵng',         N'88 Điện Biên Phủ, Thanh Khê, Đà Nẵng'),
+    (4, 'CN-BPC', N'Nhà máy Bình Phước',         N'KCN Minh Hưng III, Chơn Thành, Bình Phước'),
+    (5, 'CN-HPH', N'Nhà máy Hải Phòng',          N'KCN Đình Vũ, Hải An, Hải Phòng')
+) AS src (branch_id, branch_code, branch_name, address)
 ON tgt.branch_code = src.branch_code
 WHEN NOT MATCHED THEN
-    INSERT (branch_code, branch_name, address, is_active)
-    VALUES (src.branch_code, src.branch_name, src.address, 1);
+    INSERT (branch_id, branch_code, branch_name, address, is_active)
+    VALUES (src.branch_id, src.branch_code, src.branch_name, src.address, 1);
+
+SET IDENTITY_INSERT dbo.Branches OFF;
+GO
 
 PRINT '   Branches: ' + CAST(@@ROWCOUNT AS VARCHAR) + ' dòng đã thêm.';
 GO
@@ -55,25 +61,29 @@ GO
 -- ============================================================
 PRINT '>> [2/8] Seeding Departments...';
 
+SET IDENTITY_INSERT dbo.Departments ON;
+GO
+
 -- 2a. Phòng ban cấp 1 (parent_dept_id = NULL) — áp dụng toàn công ty
 MERGE dbo.Departments AS tgt
 USING (VALUES
-    -- Mã phòng,   Tên phòng,                              Mã chi nhánh (NULL = chung)
-    ('BAN-GD',    N'Ban Giám đốc',                         NULL),
-    ('PUR',       N'Phòng Mua Hàng',                       NULL),
-    ('ACC',       N'Phòng Kế Toán – Tài Chính',            NULL),
-    ('PROD',      N'Phòng Sản Xuất',                       NULL),
-    ('WH',        N'Phòng Kho Vận',                        NULL),
-    ('QC',        N'Phòng Kiểm Định Chất Lượng (QC)',      NULL),
-    ('IT',        N'Phòng Công Nghệ Thông Tin',            NULL),
-    ('HR',        N'Phòng Nhân Sự – Hành Chính',           NULL),
-    ('SALES',     N'Phòng Kinh Doanh',                     NULL),
-    ('TECH',      N'Phòng Kỹ Thuật – Bảo Trì',            NULL)
-) AS src (dept_code, dept_name, branch_code)
+    -- dept_id, Mã phòng,   Tên phòng,                              Mã chi nhánh (NULL = chung)
+    (1, 'BAN-GD',    N'Ban Giám đốc',                         NULL),
+    (2, 'PUR',       N'Phòng Mua Hàng',                       NULL),
+    (3, 'ACC',       N'Phòng Kế Toán – Tài Chính',            NULL),
+    (4, 'PROD',      N'Phòng Sản Xuất',                       NULL),
+    (5, 'WH',        N'Phòng Kho Vận',                        NULL),
+    (6, 'QC',        N'Phòng Kiểm Định Chất Lượng (QC)',      NULL),
+    (7, 'IT',        N'Phòng Công Nghệ Thông Tin',            NULL),
+    (8, 'HR',        N'Phòng Nhân Sự – Hành Chính',           NULL),
+    (9, 'SALES',     N'Phòng Kinh Doanh',                     NULL),
+    (10, 'TECH',      N'Phòng Kỹ Thuật – Bảo Trì',            NULL)
+) AS src (dept_id, dept_code, dept_name, branch_code)
 ON tgt.dept_code = src.dept_code
 WHEN NOT MATCHED THEN
-    INSERT (dept_code, dept_name, branch_id, parent_dept_id, is_active)
+    INSERT (dept_id, dept_code, dept_name, branch_id, parent_dept_id, is_active)
     VALUES (
+        src.dept_id,
         src.dept_code,
         src.dept_name,
         (SELECT branch_id FROM dbo.Branches WHERE branch_code = src.branch_code),
@@ -84,14 +94,15 @@ WHEN NOT MATCHED THEN
 -- 2b. Phòng ban cấp 2 — con của Phòng Mua Hàng
 MERGE dbo.Departments AS tgt
 USING (VALUES
-    ('PUR-DOM',  N'Tổ Mua Hàng Nội Địa',          'PUR'),
-    ('PUR-IMP',  N'Tổ Nhập Khẩu',                 'PUR'),
-    ('PUR-ADM',  N'Tổ Hành Chính Mua Hàng',       'PUR')
-) AS src (dept_code, dept_name, parent_code)
+    (11, 'PUR-DOM',  N'Tổ Mua Hàng Nội Địa',          'PUR'),
+    (12, 'PUR-IMP',  N'Tổ Nhập Khẩu',                 'PUR'),
+    (13, 'PUR-ADM',  N'Tổ Hành Chính Mua Hàng',       'PUR')
+) AS src (dept_id, dept_code, dept_name, parent_code)
 ON tgt.dept_code = src.dept_code
 WHEN NOT MATCHED THEN
-    INSERT (dept_code, dept_name, branch_id, parent_dept_id, is_active)
+    INSERT (dept_id, dept_code, dept_name, branch_id, parent_dept_id, is_active)
     VALUES (
+        src.dept_id,
         src.dept_code,
         src.dept_name,
         NULL,
@@ -102,20 +113,24 @@ WHEN NOT MATCHED THEN
 -- 2c. Phòng ban cấp 2 — con của Phòng Kho Vận
 MERGE dbo.Departments AS tgt
 USING (VALUES
-    ('WH-IN',    N'Tổ Nhập Kho',                  'WH'),
-    ('WH-OUT',   N'Tổ Xuất Kho',                  'WH'),
-    ('WH-INV',   N'Tổ Kiểm Kê Tồn Kho',           'WH')
-) AS src (dept_code, dept_name, parent_code)
+    (14, 'WH-IN',    N'Tổ Nhập Kho',                  'WH'),
+    (15, 'WH-OUT',   N'Tổ Xuất Kho',                  'WH'),
+    (16, 'WH-INV',   N'Tổ Kiểm Kê Tồn Kho',           'WH')
+) AS src (dept_id, dept_code, dept_name, parent_code)
 ON tgt.dept_code = src.dept_code
 WHEN NOT MATCHED THEN
-    INSERT (dept_code, dept_name, branch_id, parent_dept_id, is_active)
+    INSERT (dept_id, dept_code, dept_name, branch_id, parent_dept_id, is_active)
     VALUES (
+        src.dept_id,
         src.dept_code,
         src.dept_name,
         NULL,
         (SELECT dept_id FROM dbo.Departments WHERE dept_code = src.parent_code),
         1
     );
+
+SET IDENTITY_INSERT dbo.Departments OFF;
+GO
 
 PRINT '   Departments seeding done.';
 GO
@@ -125,23 +140,28 @@ GO
 -- ============================================================
 PRINT '>> [3/8] Seeding Roles, Permissions, RolePermissions...';
 
+SET IDENTITY_INSERT dbo.Roles ON;
+GO
+
 MERGE dbo.Roles AS tgt
 USING (VALUES
-    ('ADMIN',          N'Quản trị hệ thống',          N'Toàn quyền cấu hình hệ thống, người dùng, phân quyền'),
-    ('GD',             N'Giám đốc / Tổng giám đốc',   N'Phê duyệt cấp cao nhất, bypass matching override'),
-    ('PGD',            N'Phó giám đốc',               N'Phê duyệt cấp 2 thay thế Giám đốc'),
-    ('DEPT_HEAD',      N'Trưởng phòng',               N'Duyệt PR cấp phòng ban, đánh giá NCC'),
-    ('BUYER',          N'Nhân viên Mua hàng (Buyer)',  N'Tạo Order, gom giỏ, gửi báo giá, lập IPO'),
-    ('ACCOUNTANT',     N'Kế toán',                    N'Nhập hóa đơn, lập phiếu thanh toán, Credit/Debit Note'),
-    ('WAREHOUSE_KEEP', N'Thủ kho',                    N'Nhập kho, xuất kho, phiếu trả hàng'),
-    ('QC_STAFF',       N'Nhân viên QC',               N'Kiểm định hàng nhập, ghi nhận qty_passed/qty_failed'),
-    ('REQUESTER',      N'Nhân viên yêu cầu mua hàng', N'Tạo đơn PR, theo dõi trạng thái PR của mình'),
-    ('VIEWER',         N'Xem báo cáo',                N'Chỉ đọc dữ liệu, không tạo hay duyệt chứng từ')
-) AS src (role_code, role_name, description)
+    (1, 'ADMIN',          N'Quản trị hệ thống',          N'Toàn quyền cấu hình hệ thống, người dùng, phân quyền'),
+    (2, 'GD',             N'Giám đốc / Tổng giám đốc',   N'Phê duyệt cấp cao nhất, bypass matching override'),
+    (3, 'PGD',            N'Phó giám đốc',               N'Phê duyệt cấp 2 thay thế Giám đốc'),
+    (4, 'DEPT_HEAD',      N'Trưởng phòng',               N'Duyệt PR cấp phòng ban, đánh giá NCC'),
+    (5, 'BUYER',          N'Nhân viên Mua hàng (Buyer)',  N'Tạo Order, gom giỏ, gửi báo giá, lập IPO'),
+    (6, 'ACCOUNTANT',     N'Kế toán',                    N'Nhập hóa đơn, lập phiếu thanh toán, Credit/Debit Note'),
+    (7, 'WAREHOUSE_KEEP', N'Thủ kho',                    N'Nhập kho, xuất kho, phiếu trả hàng'),
+    (8, 'QC_STAFF',       N'Nhân viên QC',               N'Kiểm định hàng nhập, ghi nhận qty_passed/qty_failed'),
+    (9, 'REQUESTER',      N'Nhân viên yêu cầu mua hàng', N'Tạo đơn PR, theo dõi trạng thái PR của mình'),
+    (10, 'VIEWER',         N'Xem báo cáo',                N'Chỉ đọc dữ liệu, không tạo hay duyệt chứng từ')
+) AS src (role_id, role_code, role_name, description)
 ON tgt.role_code = src.role_code
 WHEN NOT MATCHED THEN
-    INSERT (role_code, role_name, description, is_active)
-    VALUES (src.role_code, src.role_name, src.description, 1);
+    INSERT (role_id, role_code, role_name, description, is_active)
+    VALUES (src.role_id, src.role_code, src.role_name, src.description, 1);
+
+SET IDENTITY_INSERT dbo.Roles OFF;
 GO
 
 -- ============================================================
