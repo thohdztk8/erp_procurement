@@ -9,8 +9,8 @@ export const cartOrderService = {
    * @param {object[]} items - Cart items to add.
    * @returns {Promise<object>}
    */
-  async addItemsToCart(items) {
-    return await api.post('/cart/add-items', { items })
+  async addItemsToCart(payload) {
+    return await api.post('/cart/add-items', payload)
   },
 
   /**

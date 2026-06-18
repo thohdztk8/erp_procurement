@@ -110,7 +110,7 @@ class PRApproveSerializer(serializers.Serializer):
 
 
 class ApprovalProgressSerializer(serializers.ModelSerializer):
-    approver_name = serializers.CharField(source="approver.full_name", read_only=True)
+    approver_name = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentApprovalProgress
@@ -118,3 +118,6 @@ class ApprovalProgressSerializer(serializers.ModelSerializer):
             "progress_id", "step_sequence", "approver_name",
             "approval_status", "comment", "action_date",
         ]
+
+    def get_approver_name(self, obj):
+        return obj.approver.full_name if obj.approver else ""
