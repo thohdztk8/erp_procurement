@@ -1,6 +1,6 @@
 <script setup>
 import { mdiForwardburger, mdiBackburger, mdiMenu } from '@mdi/js'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { menuAsideMain, menuAsideBottom } from '@/menuAside.js'
 import menuNavBar from '@/menuNavBar.js'
@@ -26,6 +26,20 @@ const isAsideLgActive = ref(false)
 router.beforeEach(() => {
   isAsideMobileExpanded.value = false
   isAsideLgActive.value = false
+})
+
+const filteredMenuAsideMain = computed(() => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  return menuAsideMain.filter((item) => {
+    if (!item.permissions || item.permissions.length === 0) {
+      return true
+    }
+    if (user.username === 'admin') {
+      return true
+    }
+    const userPermissions = user.permissions || []
+    return item.permissions.some((p) => userPermissions.includes(p))
+  })
 })
 
 const menuClick = async (event, item) => {
@@ -75,7 +89,7 @@ const menuClick = async (event, item) => {
       <AsideMenu
         :is-aside-mobile-expanded="isAsideMobileExpanded"
         :is-aside-lg-active="isAsideLgActive"
-        :menu="menuAsideMain"
+        :menu="filteredMenuAsideMain"
         :menu-bottom="menuAsideBottom"
         @menu-click="menuClick"
         @aside-lg-close-click="isAsideLgActive = false"
