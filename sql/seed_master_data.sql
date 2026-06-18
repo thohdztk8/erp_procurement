@@ -227,17 +227,21 @@ WHERE r.role_code = 'ADMIN'
   );
 GO
 
--- GD — Giám đốc: phê duyệt cao nhất + bypass + báo cáo
+-- GD — Giám đốc: phê duyệt cao nhất + bypass + báo cáo + quản trị cơ bản
 INSERT INTO dbo.RolePermissions (role_id, permission_id)
 SELECT r.role_id, p.permission_id
 FROM dbo.Roles r
 JOIN dbo.Permissions p ON p.permission_code IN (
+    'PR_CREATE','PR_EDIT','PR_SUBMIT','PR_CANCEL',
     'PR_APPROVE','PR_REJECT','PR_VIEW_ALL',
+    'IPO_CREATE','IPO_EDIT',
     'IPO_APPROVE','IPO_REJECT','IPO_VIEW_ALL',
+    'WH_INVENTORY_VIEW',
     'INV_OVERRIDE','PAYMENT_APPROVE',
-    'SUPPLIER_EVALUATE','SUPPLIER_DEACTIVATE',
+    'SUPPLIER_CREATE','SUPPLIER_EDIT','SUPPLIER_DEACTIVATE','SUPPLIER_EVALUATE',
+    'MATERIAL_CREATE','MATERIAL_EDIT',
     'REPORT_VIEW','REPORT_EXPORT','AUDIT_VIEW',
-    'CONFIG_VIEW'
+    'CONFIG_VIEW','CONFIG_EDIT','TEMPLATE_EDIT'
 )
 WHERE r.role_code = 'GD'
   AND NOT EXISTS (
