@@ -16,6 +16,9 @@ class MaterialCategorySerializer(serializers.ModelSerializer):
 
 class MaterialSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source="category.category_name", read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=MaterialCategory.objects.all(), source="category"
+    )
 
     class Meta:
         model = Material
@@ -37,6 +40,13 @@ class SupplierSerializer(serializers.ModelSerializer):
 
 
 class SupplierContractPriceSerializer(serializers.ModelSerializer):
+    supplier_id = serializers.PrimaryKeyRelatedField(
+        queryset=Supplier.objects.all(), source="supplier"
+    )
+    material_id = serializers.PrimaryKeyRelatedField(
+        queryset=Material.objects.all(), source="material"
+    )
+
     class Meta:
         model = SupplierContractPrice
         fields = [

@@ -653,7 +653,7 @@ MERGE dbo.ApprovalWorkflowSteps AS tgt
 USING (
     SELECT
         w.workflow_id,
-        s.step_sequence,
+        step_src.step_sequence,
         r.role_id
     FROM (VALUES
         -- workflow_name,                                           step, role_code
