@@ -216,6 +216,9 @@ class PRService:
     @staticmethod
     def _approver_has_permission(approver, pr, step_sequence: int) -> bool:
         """Kiểm tra approver có role phù hợp với bước phê duyệt."""
+        # Admin và Giám đốc (GD) được phép duyệt/duyệt thay mọi bước
+        if approver.is_superuser or getattr(approver.role, 'role_code', '') in ['ADMIN', 'GD']:
+            return True
         from apps.master_data.models import ApprovalWorkflowStep
         return ApprovalWorkflowStep.objects.filter(
             workflow__object_type__in=["PR_NORMAL", "PR_URGENT"],
