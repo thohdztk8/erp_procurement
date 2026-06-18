@@ -59,8 +59,8 @@ class PRListView(APIView):
             "requester", "dept", "branch"
         ).prefetch_related("items")
 
-        # Lọc theo role: dept head chỉ thấy PR của dept mình
-        if not request.user.is_superuser:
+        # Lọc theo role: Chỉ thấy PR của dept mình trừ khi có quyền PR_VIEW_ALL
+        if not request.user.has_permission("PR_VIEW_ALL"):
             qs = qs.filter(dept=request.user.dept)
 
         pr_status = request.query_params.get("status")
