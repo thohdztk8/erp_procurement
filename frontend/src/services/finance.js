@@ -18,8 +18,8 @@ export const financeService = {
    * Get list of invoices.
    * @returns {Promise<object>}
    */
-  async getInvoices() {
-    return await api.get('/invoice/')
+  async getInvoices(params = {}) {
+    return await api.get('/invoice/', { params })
   },
 
   /**
@@ -64,8 +64,8 @@ export const financeService = {
    * Get payment requests.
    * @returns {Promise<object>}
    */
-  async getPayments() {
-    return await api.get('/invoice/payment/')
+  async getPayments(params = {}) {
+    return await api.get('/invoice/payment/', { params })
   },
 
   /**

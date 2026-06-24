@@ -10,6 +10,7 @@ import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.
 import CreditDebitModal from '@/components/CreditDebitModal.vue'
 import AccountingExportModal from '@/components/AccountingExportModal.vue'
 import SystemConfigModal from '@/components/SystemConfigModal.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { financeService } from '@/services/api'
 
 const activeTab = ref('invoices')
@@ -20,16 +21,48 @@ const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 const isAdmin = ref(currentUser.value.role_code === 'ADMIN' || currentUser.value.username === 'admin')
 const isAccountant = ref(currentUser.value.role_code === 'ACCOUNTANT' || isAdmin.value)
 
+const invoicePage = ref(1)
+const invoiceTotalPages = ref(1)
+const invoiceTotalItems = ref(0)
+
+const paymentPage = ref(1)
+const paymentTotalPages = ref(1)
+const paymentTotalItems = ref(0)
+
 const fetchData = async () => {
   try {
-    const invRes = await financeService.getInvoices()
-    invoices.value = invRes.results || []
-    const payRes = await financeService.getPayments()
-    payments.value = payRes.results || []
+    const invRes = await financeService.getInvoices({ page: invoicePage.value })
+    invoices.value = invRes.data.items || []
+    invoiceTotalPages.value = invRes.data.pagination?.total_pages || 1
+    invoiceTotalItems.value = invRes.data.pagination?.total_items || 0
+  } catch (error) {
+    console.error('Lỗi khi tải hóa đơn:', error)
+  }
+
+  try {
+    const payRes = await financeService.getPayments({ page: paymentPage.value })
+    payments.value = payRes.data.items || []
+    paymentTotalPages.value = payRes.data.pagination?.total_pages || 1
+    paymentTotalItems.value = payRes.data.pagination?.total_items || 0
+  } catch (error) {
+    console.error('Lỗi khi tải yêu cầu chi:', error)
+  }
+
+  try {
     const crRes = await financeService.getCreditNotes()
-    creditNotes.value = crRes.results || []
+    creditNotes.value = crRes.data.items || []
+  } catch (error) {
+    console.warn('Không tải được Credit Notes:', error)
+  }
+
+  try {
     const drRes = await financeService.getDebitNotes()
-    debitNotes.value = drRes.results || []
+    debitNotes.value = drRes.data.items || []
+  } catch (error) {
+    console.warn('Không tải được Debit Notes:', error)
+  }
+
+  try {
     const repRes = await financeService.getReports('dashboard-summary')
     reportsData.value = repRes.data || { kpi: {} }
   } catch (error) {
@@ -94,6 +127,17 @@ const handleSaveNote = async (data) => {
     alert('Lưu phiếu thất bại.')
   }
 }
+
+const changeInvoicePage = (page) => {
+  invoicePage.value = page
+  fetchData()
+}
+
+const changePaymentPage = (page) => {
+  paymentPage.value = page
+  fetchData()
+}
+
 const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
 </script>
 
@@ -108,8 +152,8 @@ const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currenc
       </SectionTitleLineWithButton>
 
       <div class="flex space-x-4 mb-4 border-b">
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'invoices' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'invoices'">Hóa đơn NCC ({{ invoices.length }})</button>
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'payments' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'payments'">Yêu cầu chi ({{ payments.length }})</button>
+        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'invoices' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'invoices'">Hóa đơn NCC ({{ invoiceTotalItems }})</button>
+        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'payments' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'payments'">Yêu cầu chi ({{ paymentTotalItems }})</button>
         <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'notes' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'notes'">Credit/Debit Notes</button>
         <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'reports' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'reports'">Thống kê & KPI</button>
       </div>
@@ -139,6 +183,12 @@ const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currenc
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="invoicePage"
+          :total-pages="invoiceTotalPages"
+          :total-items="invoiceTotalItems"
+          @change-page="changeInvoicePage"
+        />
       </CardBox>
 
       <CardBox v-else-if="activeTab === 'payments'" has-table>
@@ -165,6 +215,12 @@ const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currenc
             </tr>
           </tbody>
         </table>
+        <BasePagination
+          :current-page="paymentPage"
+          :total-pages="paymentTotalPages"
+          :total-items="paymentTotalItems"
+          @change-page="changePaymentPage"
+        />
       </CardBox>
 
       <CardBox v-else-if="activeTab === 'notes'" has-table>

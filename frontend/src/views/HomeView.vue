@@ -10,12 +10,21 @@ import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.
 import PRTable from '@/components/PRTable.vue'
 import PRDetailModal from '@/components/PRDetailModal.vue'
 import PRCreateModal from '@/components/PRCreateModal.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { prService } from '@/services/api'
 
 const prs = ref([])
 const pendingPrs = ref([])
 const stats = ref({ total: 0, draft: 0, pending: 0, approved: 0 })
 const activeTab = ref('all') // 'all' hoặc 'pending'
+
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
+
+const pendingPage = ref(1)
+const pendingTotalPages = ref(1)
+const pendingTotalItems = ref(0)
 
 const showCreateModal = ref(false)
 const showDetailModal = ref(false)
@@ -25,20 +34,26 @@ const currentUser = ref(JSON.parse(localStorage.getItem('user') || '{}'))
 
 const fetchPRs = async () => {
   try {
-    const response = await prService.getPRs()
+    const response = await prService.getPRs({ page: currentPage.value })
     prs.value = response.data.items || []
+    totalPages.value = response.data.pagination?.total_pages || 1
+    totalItems.value = response.data.pagination?.total_items || 0
     
-    // Tính toán số liệu thống kê
-    stats.value.total = prs.value.length
-    stats.value.draft = prs.value.filter(p => p.pr_status === 'DRAFT').length
-    stats.value.pending = prs.value.filter(p => p.pr_status === 'PENDING').length
-    stats.value.approved = prs.value.filter(p => p.pr_status === 'APPROVED').length
+    // Tính toán số liệu thống kê bằng cách fetch danh sách lớn hơn hoặc ước lượng từ pagination
+    const statsRes = await prService.getPRs({ page_size: 1000 })
+    const allPrs = statsRes.data.items || []
+    stats.value.total = statsRes.data.pagination?.total_items || allPrs.length
+    stats.value.draft = allPrs.filter(p => p.pr_status === 'DRAFT').length
+    stats.value.pending = allPrs.filter(p => p.pr_status === 'PENDING').length
+    stats.value.approved = allPrs.filter(p => p.pr_status === 'APPROVED').length
 
     // Nếu user có quyền duyệt, lấy danh sách chờ duyệt
     const isApprover = currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin'
     if (isApprover) {
-      const pendingRes = await prService.getPendingPRs()
-      pendingPrs.value = pendingRes.results || []
+      const pendingRes = await prService.getPendingPRs({ page: pendingPage.value })
+      pendingPrs.value = pendingRes.data.items || []
+      pendingTotalPages.value = pendingRes.data.pagination?.total_pages || 1
+      pendingTotalItems.value = pendingRes.data.pagination?.total_items || 0
     }
   } catch (error) {
     console.error(error)
@@ -118,6 +133,16 @@ const handleSavePR = async (formData) => {
   }
 }
 
+const changeAllPage = (page) => {
+  currentPage.value = page
+  fetchPRs()
+}
+
+const changePendingPage = (page) => {
+  pendingPage.value = page
+  fetchPRs()
+}
+
 const showApproveForm = computed(() => {
   if (!prDetailData.value) return false
   const pr = prDetailData.value.pr
@@ -167,32 +192,46 @@ const isApproverRole = computed(() => {
           :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
           @click="activeTab = 'pending'"
         >
-          Chờ tôi duyệt ({{ pendingPrs.length }})
+          Chờ tôi duyệt ({{ pendingTotalItems }})
         </button>
       </div>
 
       <!-- Bảng danh sách -->
       <CardBox has-table class="mb-6">
-        <PRTable 
-          v-if="activeTab === 'all'" 
-          :prs="prs" 
-          :show-approval-actions="isApproverRole"
-          @view="handleView" 
-          @submit="handleSubmit" 
-          @approve="handleView" 
-          @edit="handleEdit"
-          @cancel="handleCancel"
-        />
-        <PRTable 
-          v-else 
-          :prs="pendingPrs" 
-          :show-approval-actions="true"
-          @view="handleView" 
-          @submit="handleSubmit" 
-          @approve="handleView" 
-          @edit="handleEdit"
-          @cancel="handleCancel"
-        />
+        <div v-if="activeTab === 'all'">
+          <PRTable 
+            :prs="prs" 
+            :show-approval-actions="isApproverRole"
+            @view="handleView" 
+            @submit="handleSubmit" 
+            @approve="handleView" 
+            @edit="handleEdit"
+            @cancel="handleCancel"
+          />
+          <BasePagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="totalItems"
+            @change-page="changeAllPage"
+          />
+        </div>
+        <div v-else>
+          <PRTable 
+            :prs="pendingPrs" 
+            :show-approval-actions="true"
+            @view="handleView" 
+            @submit="handleSubmit" 
+            @approve="handleView" 
+            @edit="handleEdit"
+            @cancel="handleCancel"
+          />
+          <BasePagination
+            :current-page="pendingPage"
+            :total-pages="pendingTotalPages"
+            :total-items="pendingTotalItems"
+            @change-page="changePendingPage"
+          />
+        </div>
       </CardBox>
     </SectionMain>
 

@@ -43,7 +43,11 @@ class PRCreateSerializer(serializers.Serializer):
 
 
 class PRItemSerializer(serializers.ModelSerializer):
-    material_code = serializers.CharField(source="material.material_code", read_only=True)
+    """
+    Serializer hiển thị thông tin chi tiết của từng mặt hàng yêu cầu mua sắm (PR Item).
+    Hỗ trợ xử lý hiển thị cả vật tư có sẵn trong danh mục và vật tư ngoài danh mục (vật tư tự nhập).
+    """
+    material_code = serializers.SerializerMethodField()
     material_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -55,7 +59,29 @@ class PRItemSerializer(serializers.ModelSerializer):
             "estimated_unit_price", "required_deadline", "item_status",
         ]
 
+    def get_material_code(self, obj):
+        """
+        Lấy mã vật tư từ đối tượng material liên kết.
+        Nếu material là None (vật tư tự nhập), trả về None.
+        
+        Parameters:
+            obj (PRItem): Đối tượng dòng yêu cầu mua sắm cần lấy thông tin.
+            
+        Returns:
+            str | None: Mã vật tư hoặc None nếu là vật tư ngoài danh mục.
+        """
+        return obj.material.material_code if obj.material else None
+
     def get_material_name(self, obj):
+        """
+        Lấy tên vật tư. Ưu tiên tên vật tư trong danh mục, nếu không có thì lấy tên vật tư tự nhập.
+        
+        Parameters:
+            obj (PRItem): Đối tượng dòng yêu cầu mua sắm.
+            
+        Returns:
+            str: Tên vật tư hiển thị.
+        """
         if obj.material_id:
             return obj.material.material_name
         return obj.material_name_other
@@ -110,7 +136,7 @@ class PRApproveSerializer(serializers.Serializer):
 
 
 class ApprovalProgressSerializer(serializers.ModelSerializer):
-    approver_name = serializers.CharField(source="approver.full_name", read_only=True)
+    approver_name = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentApprovalProgress
@@ -118,3 +144,6 @@ class ApprovalProgressSerializer(serializers.ModelSerializer):
             "progress_id", "step_sequence", "approver_name",
             "approval_status", "comment", "action_date",
         ]
+
+    def get_approver_name(self, obj):
+        return obj.approver.full_name if obj.approver else ""

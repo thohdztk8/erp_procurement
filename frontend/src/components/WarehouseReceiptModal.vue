@@ -21,7 +21,19 @@ const formItems = ref([])
 const fetchApprovedIpos = async () => {
   try {
     const res = await ipoService.getIPOs()
-    approvedIpos.value = (res.results || []).filter(i => i.ipo_status === 'APPROVED')
+    approvedIpos.value = (res.data.items || []).filter(i => i.ipo_status === 'APPROVED')
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const branches = ref([])
+const selectedBranchId = ref(null)
+
+const fetchBranches = async () => {
+  try {
+    const res = await api.get('/auth/branches')
+    branches.value = res.data || []
   } catch (error) {
     console.error(error)
   }

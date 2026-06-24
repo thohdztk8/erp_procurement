@@ -102,6 +102,14 @@ class PRService:
 
         # Tạo các bước phê duyệt từ workflow
         steps = list(workflow.steps.order_by("step_sequence"))
+        if not steps:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("Luồng phê duyệt phù hợp không có bước duyệt nào được cấu hình. Vui lòng liên hệ quản trị viên.")
+
+        old_status = pr.pr_status
+        pr.pr_status = "PENDING"
+        pr.save(update_fields=["pr_status", "updated_at"])
+
         progress_records = [
             DocumentApprovalProgress(
                 document_type="PR",
@@ -158,7 +166,7 @@ class PRService:
 
         if not current_step:
             from rest_framework.exceptions import ValidationError
-            raise ValidationError("Không tìm thấy bước phê duyệt đang chờ.")
+            raise ValidationError("Không tìm thấy bước phê duyệt đang chờ. Có thể quy trình phê duyệt của chứng từ này bị cấu hình thiếu hoặc bị lỗi dữ liệu.")
 
         # Kiểm tra approver có role đúng không
         if not PRService._approver_has_permission(approver, pr, current_step.step_sequence):
@@ -238,8 +246,8 @@ class PRService:
     @transaction.atomic
     def update_pr(pr: PurchaseRequisition, user, validated_data: dict) -> PurchaseRequisition:
         from rest_framework.exceptions import ValidationError
-        if pr.pr_status not in ["DRAFT", "PENDING"]:
-            raise ValidationError("Chỉ có thể sửa đơn ở trạng thái DRAFT hoặc PENDING.")
+        if pr.pr_status not in ["DRAFT"]:
+            raise ValidationError("Chỉ có thể sửa đơn ở trạng thái DRAFT")
         
         pr.priority_level = validated_data.get("priority_level", pr.priority_level)
         pr.urgent_reason = validated_data.get("urgent_reason", pr.urgent_reason)

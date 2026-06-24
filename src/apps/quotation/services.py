@@ -2,6 +2,7 @@
 QuotationService: sinh token SHA-256, gửi mail async,
 quản lý version báo giá, chốt phương án NCC.
 """
+import hashlib
 import json
 import logging
 from datetime import timedelta
@@ -105,7 +106,7 @@ class QuotationService:
         Tự động quản lý version, khóa token sau khi submit.
         """
         token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(
-            token=token_value
+            token=hashlib.sha256(token_value.encode("utf-8")).hexdigest()
         )
         q_request = token_obj.q_request
 

@@ -107,7 +107,11 @@ class OrderListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        qs = Order.objects.filter(buyer=request.user).prefetch_related("items").order_by("-created_at")
+        if request.user.has_permission("QUOTATION_SELECT"):
+            qs = Order.objects.all()
+        else:
+            qs = Order.objects.filter(buyer=request.user)
+        qs = qs.prefetch_related("items").order_by("-created_at")
         paginator = StandardResultsPagination()
         page = paginator.paginate_queryset(qs, request)
         return paginator.get_paginated_response(OrderListSerializer(page, many=True).data)

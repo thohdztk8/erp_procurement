@@ -21,17 +21,24 @@ api.interceptors.request.use(
   }
 )
 
-// Response Interceptor: Xử lý khi token hết hạn hoặc lỗi 401
+// Response Interceptor: Xử lý khi token hết hạn hoặc lỗi 401, hiển thị thông báo lỗi
 api.interceptors.response.use(
   (response) => response.data,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('access_token')
-      localStorage.removeItem('refresh_token')
-      localStorage.removeItem('user')
-      if (window.location.hash !== '#/login') {
-        window.location.href = '#/login'
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        localStorage.removeItem('user')
+        if (window.location.hash !== '#/login') {
+          window.location.href = '#/login'
+        }
+      } else {
+        const errMsg = error.response.data?.message || error.response.data?.detail || 'Đã xảy ra lỗi hệ thống.'
+        alert(`Lỗi: ${errMsg}`)
       }
+    } else {
+      alert('Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối mạng.')
     }
     return Promise.reject(error)
   }

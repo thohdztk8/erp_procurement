@@ -8,8 +8,8 @@ export const ipoService = {
    * Get list of IPOs.
    * @returns {Promise<object>}
    */
-  async getIPOs() {
-    return await api.get('/ipo/')
+  async getIPOs(params = {}) {
+    return await api.get('/ipo/', { params })
   },
 
   /**

@@ -16,7 +16,7 @@ from .serializers import (
 
 
 class MaterialListView(APIView):
-    """GET /api/v2/master/materials"""
+    """GET/POST /api/v2/master/materials"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -35,6 +35,29 @@ class MaterialListView(APIView):
         serializer = MaterialSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
+    def post(self, request):
+        """
+        Tạo vật tư mới.
+        
+        Parameters:
+        - request (Request): Django REST Framework request object chứa body là thông tin vật tư.
+        
+        Returns:
+        - Response: 201 Created với thông tin vật tư được tạo hoặc 403 Forbidden nếu không có quyền.
+        """
+        if not request.user.has_permission("MATERIAL_CREATE"):
+            return Response(
+                {"success": False, "message": "Bạn không có quyền tạo vật tư."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = MaterialSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"success": True, "message": "Tạo vật tư mới thành công.", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
+
 
 class MaterialDetailView(APIView):
     """GET /api/v2/master/materials/<id>"""
@@ -51,7 +74,7 @@ class MaterialDetailView(APIView):
 
 
 class SupplierListView(APIView):
-    """GET /api/v2/master/suppliers"""
+    """GET/POST /api/v2/master/suppliers"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -65,6 +88,29 @@ class SupplierListView(APIView):
         page = paginator.paginate_queryset(qs, request)
         serializer = SupplierSerializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+    def post(self, request):
+        """
+        Tạo nhà cung cấp mới.
+        
+        Parameters:
+        - request (Request): Django REST Framework request object chứa body là thông tin nhà cung cấp.
+        
+        Returns:
+        - Response: 201 Created với thông tin nhà cung cấp được tạo hoặc 403 Forbidden nếu không có quyền.
+        """
+        if not request.user.has_permission("SUPPLIER_CREATE"):
+            return Response(
+                {"success": False, "message": "Bạn không có quyền tạo nhà cung cấp."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = SupplierSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"success": True, "message": "Tạo nhà cung cấp mới thành công.", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class SupplierDetailView(APIView):

@@ -22,7 +22,7 @@ const isLoading = ref(false)
 const fetchOrders = async () => {
   try {
     const res = await cartOrderService.getOrders()
-    orders.value = res.results || []
+    orders.value = res.data?.items || []
   } catch (error) {
     console.error(error)
   }
@@ -71,8 +71,8 @@ const handleCreateIPO = async (quotation) => {
       supplier_id: quotation.supplier_id,
       items: quotation.items.map(it => ({
         order_item_id: it.order_item_id,
-        qty_final: parseFloat(it.qty_offered),
-        unit_price: parseFloat(it.unit_price_offered)
+        qty_final: parseFloat(it.qty_ordered),
+        unit_price: parseFloat(it.quoted_unit_price)
       }))
     }
     await ipoService.createIPOVersion(payload)
@@ -142,13 +142,13 @@ const formatCurrency = (val) => {
               <div class="flex justify-between items-start border-b pb-3">
                 <div>
                   <h4 class="font-bold text-md text-blue-600 dark:text-blue-400">
-                    {{ q.supplier?.supplier_name || 'Nhà cung cấp #' + q.supplier_id }}
+                    {{ q.supplier_name || 'Nhà cung cấp #' + q.supplier_id }}
                   </h4>
-                  <span class="text-xs text-gray-400">Mã nhà cung cấp: {{ q.supplier?.supplier_code }}</span>
+                  <span class="text-xs text-gray-400">Mã nhà cung cấp: {{ q.supplier_code }}</span>
                 </div>
                 <div class="text-right">
                   <span class="text-[10px] uppercase font-bold text-gray-400">Tổng giá trị chào thầu:</span>
-                  <p class="text-lg font-black text-green-600 dark:text-green-400">{{ formatCurrency(q.total_amount) }}</p>
+                  <p class="text-lg font-black text-green-600 dark:text-green-400">{{ formatCurrency(q.total_quote_amount) }}</p>
                 </div>
               </div>
 
@@ -164,11 +164,11 @@ const formatCurrency = (val) => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="it in q.items" :key="it.quotation_item_id" class="border-b">
-                      <td class="px-3 py-1.5 font-medium border-r">{{ it.order_item?.material?.material_name || it.order_item?.material_name_other }}</td>
-                      <td class="px-3 py-1.5 text-right border-r font-semibold">{{ parseFloat(it.qty_offered) }}</td>
-                      <td class="px-3 py-1.5 text-right border-r">{{ formatCurrency(it.unit_price_offered) }}</td>
-                      <td class="px-3 py-1.5 text-right font-semibold">{{ formatCurrency(it.qty_offered * it.unit_price_offered) }}</td>
+                    <tr v-for="it in q.items" :key="it.q_item_id" class="border-b">
+                      <td class="px-3 py-1.5 font-medium border-r">{{ it.material_name || it.material_name_other }}</td>
+                      <td class="px-3 py-1.5 text-right border-r font-semibold">{{ parseFloat(it.qty_ordered) }}</td>
+                      <td class="px-3 py-1.5 text-right border-r">{{ formatCurrency(it.quoted_unit_price) }}</td>
+                      <td class="px-3 py-1.5 text-right font-semibold">{{ formatCurrency(it.quoted_unit_price*it.qty_ordered) }}</td>
                     </tr>
                   </tbody>
                 </table>

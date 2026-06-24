@@ -11,6 +11,7 @@ import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
 import PODetailModal from '@/components/PODetailModal.vue'
 import CartDetailModal from '@/components/CartDetailModal.vue'
+import BasePagination from '@/components/BasePagination.vue'
 import { prService, cartOrderService } from '@/services/api'
 
 const activeTab = ref('create-po')
@@ -27,11 +28,19 @@ const showDetailModal = ref(false)
 const selectedOrderId = ref(null)
 const isSubmitting = ref(false)
 
+const cartPage = ref(1)
+const cartTotalPages = ref(1)
+const cartTotalItems = ref(0)
+
+const orderPage = ref(1)
+const orderTotalPages = ref(1)
+const orderTotalItems = ref(0)
+
 const fetchData = async () => {
   try {
     // 1. Lấy tất cả PR đã duyệt
     const prRes = await prService.getPRs('APPROVED')
-    const prs = prRes.results || []
+    const prs = prRes.data?.items || []
     
     // Gom tất cả các vật tư ở trạng thái PENDING từ các PR đã duyệt
     const items = []
@@ -52,12 +61,16 @@ const fetchData = async () => {
     approvedPrItems.value = items
 
     // 2. Lấy danh sách Giỏ hàng
-    const cartRes = await cartOrderService.getCarts()
-    carts.value = cartRes.results || []
+    const cartRes = await cartOrderService.getCarts({ page: cartPage.value })
+    carts.value = cartRes.data?.items || []
+    cartTotalPages.value = cartRes.data?.pagination?.total_pages || 1
+    cartTotalItems.value = cartRes.data?.pagination?.total_items || 0
 
     // 3. Lấy danh sách PO
-    const orderRes = await cartOrderService.getOrders()
-    orders.value = orderRes.results || []
+    const orderRes = await cartOrderService.getOrders({ page: orderPage.value })
+    orders.value = orderRes.data?.items || []
+    orderTotalPages.value = orderRes.data?.pagination?.total_pages || 1
+    orderTotalItems.value = orderRes.data?.pagination?.total_items || 0
   } catch (error) {
     console.error(error)
   }
@@ -66,6 +79,16 @@ const fetchData = async () => {
 onMounted(() => {
   fetchData()
 })
+
+const changeCartPage = (page) => {
+  cartPage.value = page
+  fetchData()
+}
+
+const changeOrderPage = (page) => {
+  orderPage.value = page
+  fetchData()
+}
 
 const handleCreatePO = async () => {
   if (selectedItems.value.length === 0) {
@@ -221,6 +244,12 @@ const handleCartConverted = () => {
               </tr>
             </tbody>
           </table>
+          <BasePagination
+            :current-page="cartPage"
+            :total-pages="cartTotalPages"
+            :total-items="cartTotalItems"
+            @change-page="changeCartPage"
+          />
         </CardBox>
       </div>
 
@@ -254,6 +283,12 @@ const handleCartConverted = () => {
               </tr>
             </tbody>
           </table>
+          <BasePagination
+            :current-page="orderPage"
+            :total-pages="orderTotalPages"
+            :total-items="orderTotalItems"
+            @change-page="changeOrderPage"
+          />
         </CardBox>
       </div>
     </SectionMain>

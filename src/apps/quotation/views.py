@@ -1,3 +1,4 @@
+import hashlib
 import logging
 
 from rest_framework import status
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions.rbac import require_permission
+from core.utils.token_generator import verify_vendor_token
 
 from .models import Quotation, QuotationRequest, QuotationToken
 from .serializers import (
@@ -22,7 +24,7 @@ logger = logging.getLogger("apps")
 
 class InviteQuotationView(APIView):
     """POST /api/v2/quotation/invite"""
-    permission_classes = [IsAuthenticated, require_permission("QUOTATION_INVITE")]
+    permission_classes = [IsAuthenticated, require_permission("ORDER_SEND_QUOTE")]
 
     def post(self, request):
         serializer = InviteQuotationSerializer(data=request.data)
@@ -56,7 +58,9 @@ class VendorPortalDetailView(APIView):
             
         from django.utils import timezone
         try:
-            token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(token=token_val)
+            token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(
+                token=hashlib.sha256(token_val.encode("utf-8")).hexdigest()
+            )
         except QuotationToken.DoesNotExist:
             return Response({"detail": "Token không hợp lệ."}, status=400)
             

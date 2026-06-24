@@ -9,8 +9,16 @@ export const cartOrderService = {
    * @param {object[]} items - Cart items to add.
    * @returns {Promise<object>}
    */
-  async addItemsToCart(items) {
-    return await api.post('/cart/add-items', { items })
+  async addItemsToCart(payload) {
+    return await api.post('/cart/add-items', payload)
+  },
+
+  /**
+   * Get list of carts.
+   * @returns {Promise<object>}
+   */
+  async getCarts(params = {}) {
+    return await api.get('/cart/', { params })
   },
 
   /**
@@ -62,8 +70,8 @@ export const cartOrderService = {
    * Get orders list.
    * @returns {Promise<object>}
    */
-  async getOrders() {
-    return await api.get('/cart/orders')
+  async getOrders(params = {}) {
+    return await api.get('/cart/orders', { params })
   },
 
   /**
