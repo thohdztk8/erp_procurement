@@ -36,7 +36,12 @@ def send_quotation_invite_email(
                 "deadline": deadline,
             },
         )
-        logger.info("Quotation invite sent to %s for order %s", supplier_email, order_code)
+        logger.info(
+            "Quotation invite sent to %s for order %s with url %s",
+            supplier_email,
+            order_code,
+            portal_url,
+        )
     except Exception as exc:
         logger.error("Failed to send quotation invite to %s: %s", supplier_email, exc)
         raise self.retry(exc=exc)

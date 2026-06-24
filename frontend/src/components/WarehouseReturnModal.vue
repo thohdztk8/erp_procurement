@@ -28,10 +28,10 @@ const itemInput = reactive({
 onMounted(async () => {
   try {
     const supRes = await masterService.getSuppliers()
-    suppliers.value = supRes.results || []
+    suppliers.value = supRes.data.items || []
 
     const matRes = await masterService.getMaterials()
-    materials.value = matRes.results || []
+    materials.value = matRes.data.items || []
   } catch (error) {
     console.error(error)
   }

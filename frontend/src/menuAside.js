@@ -34,7 +34,7 @@ export const menuAsideMain = [
     to: '/quotations',
     icon: mdiCompare,
     label: 'Đấu thầu & Báo giá',
-    permissions: ['ORDER_SEND_QUOTE'],
+    permissions: ['ORDER_SEND_QUOTE', 'QUOTATION_SELECT'],
   },
   {
     to: '/contracts',

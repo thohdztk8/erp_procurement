@@ -30,7 +30,7 @@ const branches = ref([])
 onMounted(async () => {
   try {
     const res = await masterService.getMaterials()
-    materials.value = res.results || []
+    materials.value = res.data.items || []
     
     // Also fetch branches, use api from client
     const { default: api } = await import('@/services/client')

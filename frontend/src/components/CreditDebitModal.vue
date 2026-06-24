@@ -27,10 +27,10 @@ const invoices = ref([])
 onMounted(async () => {
   try {
     const supRes = await masterService.getSuppliers()
-    suppliers.value = supRes.results || []
+    suppliers.value = supRes.data.items || []
 
     const invRes = await financeService.getInvoices()
-    invoices.value = invRes.results || []
+    invoices.value = invRes.data.items || []
   } catch (error) {
     console.error(error)
   }

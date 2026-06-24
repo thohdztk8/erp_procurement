@@ -29,7 +29,7 @@ const roles = ref([])
 onMounted(async () => {
   try {
     const res = await masterService.getRoles()
-    roles.value = res.results || []
+    roles.value = res.data.items || []
   } catch (error) {
     console.error(error)
   }

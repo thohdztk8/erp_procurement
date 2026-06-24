@@ -34,9 +34,12 @@ class VendorPortalSubmitSerializer(serializers.Serializer):
     items = QuotationItemSubmitSerializer(many=True, min_length=1)
 
     def validate_token(self, value):
+        import hashlib
         from django.utils import timezone
         try:
-            token_obj = QuotationToken.objects.select_related("q_request").get(token=value)
+            token_obj = QuotationToken.objects.select_related("q_request").get(
+                token=hashlib.sha256(value.encode("utf-8")).hexdigest()
+            )
         except QuotationToken.DoesNotExist:
             raise serializers.ValidationError("Token không hợp lệ.")
         if token_obj.is_used:
@@ -48,24 +51,31 @@ class VendorPortalSubmitSerializer(serializers.Serializer):
 
 class QuotationItemSerializer(serializers.ModelSerializer):
     material_name = serializers.SerializerMethodField()
+    qty_ordered = serializers.SerializerMethodField()
 
     class Meta:
         model = QuotationItem
-        fields = ["q_item_id", "order_item_id", "material_name", "quoted_unit_price", "supplier_note"]
+        fields = ["q_item_id", "order_item_id", "material_name", "quoted_unit_price", "supplier_note", "qty_ordered"]
 
     def get_material_name(self, obj):
         oi = obj.order_item
         return oi.material.material_name if oi.material_id else oi.material_name_other
 
+    def get_qty_ordered(self, obj):
+        oi = obj.order_item
+        return oi.qty_total_ordered
+
 
 class QuotationSerializer(serializers.ModelSerializer):
     supplier_name = serializers.CharField(source="supplier.supplier_name", read_only=True)
+    supplier_code = serializers.CharField(source="supplier.supplier_code", read_only=True)
+    supplier_id = serializers.IntegerField(source="supplier.supplier_id", read_only=True)
     items = QuotationItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quotation
         fields = [
-            "quotation_id", "supplier_name", "submitted_at",
+            "quotation_id", "supplier_name", "supplier_code", "supplier_id", "submitted_at",
             "delivery_lead_time_days", "payment_terms_note",
             "total_quote_amount", "is_selected", "items",
         ]

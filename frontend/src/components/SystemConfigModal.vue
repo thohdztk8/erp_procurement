@@ -13,7 +13,7 @@ const fetchConfigs = async () => {
   isLoading.value = true
   try {
     const res = await financeService.getConfigs()
-    configs.value = res.results || []
+    configs.value = res.data.items || []
   } catch (error) {
     console.error(error)
   } finally {

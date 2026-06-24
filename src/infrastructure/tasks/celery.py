@@ -15,3 +15,9 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Tự động discover tasks trong tất cả INSTALLED_APPS
 app.autodiscover_tasks()
+
+# Explicit include cho tasks nằm ngoài INSTALLED_APPS
+# (infrastructure/tasks/ không phải Django app nên autodiscover không tìm thấy)
+app.conf.include = [
+    "infrastructure.tasks.email_tasks",
+]

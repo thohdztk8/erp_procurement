@@ -186,6 +186,7 @@ USING (VALUES
     ('CART_CREATE',         N'Tạo giỏ gom hàng',                       'ORDER'),
     ('ORDER_CREATE',        N'Tạo phiên đơn hàng (Order)',             'ORDER'),
     ('ORDER_SEND_QUOTE',    N'Gửi yêu cầu báo giá NCC',               'ORDER'),
+    ('QUOTATION_SELECT',    N'Lựa chọn báo giá tốt nhất',               'ORDER'),
     -- IPO
     ('IPO_CREATE',          N'Tạo đơn đặt hàng nội bộ (IPO)',          'IPO'),
     ('IPO_EDIT',            N'Chỉnh sửa IPO ở trạng thái DRAFT',       'IPO'),
@@ -253,7 +254,7 @@ SELECT r.role_id, p.permission_id
 FROM dbo.Roles r
 JOIN dbo.Permissions p ON p.permission_code IN (
     'PR_CREATE','PR_EDIT','PR_SUBMIT','PR_CANCEL',
-    'PR_APPROVE','PR_REJECT','PR_VIEW_ALL',
+    'PR_APPROVE','PR_REJECT','PR_VIEW_ALL','QUOTATION_SELECT',
     'IPO_CREATE','IPO_EDIT',
     'IPO_APPROVE','IPO_REJECT','IPO_VIEW_ALL',
     'WH_INVENTORY_VIEW',
@@ -275,7 +276,7 @@ INSERT INTO dbo.RolePermissions (role_id, permission_id)
 SELECT r.role_id, p.permission_id
 FROM dbo.Roles r
 JOIN dbo.Permissions p ON p.permission_code IN (
-    'PR_APPROVE','PR_REJECT','PR_VIEW_ALL',
+    'PR_APPROVE','PR_REJECT','PR_VIEW_ALL','QUOTATION_SELECT',
     'IPO_APPROVE','IPO_REJECT','IPO_VIEW_ALL',
     'INV_OVERRIDE','PAYMENT_APPROVE',
     'SUPPLIER_EVALUATE',
@@ -294,6 +295,7 @@ SELECT r.role_id, p.permission_id
 FROM dbo.Roles r
 JOIN dbo.Permissions p ON p.permission_code IN (
     'PR_CREATE','PR_EDIT','PR_SUBMIT','PR_APPROVE','PR_REJECT','PR_CANCEL','PR_VIEW_ALL',
+    'QUOTATION_SELECT',
     'IPO_VIEW_ALL',
     'SUPPLIER_EVALUATE',
     'WH_INVENTORY_VIEW',
@@ -312,7 +314,7 @@ SELECT r.role_id, p.permission_id
 FROM dbo.Roles r
 JOIN dbo.Permissions p ON p.permission_code IN (
     'PR_VIEW_ALL',
-    'CART_CREATE','ORDER_CREATE','ORDER_SEND_QUOTE',
+    'CART_CREATE','ORDER_CREATE','ORDER_SEND_QUOTE','QUOTATION_SELECT',
     'IPO_CREATE','IPO_EDIT','IPO_VIEW_ALL',
     'SUPPLIER_CREATE','SUPPLIER_EDIT',
     'MATERIAL_CREATE','MATERIAL_EDIT',

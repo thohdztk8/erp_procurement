@@ -246,8 +246,8 @@ class PRService:
     @transaction.atomic
     def update_pr(pr: PurchaseRequisition, user, validated_data: dict) -> PurchaseRequisition:
         from rest_framework.exceptions import ValidationError
-        if pr.pr_status not in ["DRAFT", "PENDING"]:
-            raise ValidationError("Chỉ có thể sửa đơn ở trạng thái DRAFT hoặc PENDING.")
+        if pr.pr_status not in ["DRAFT"]:
+            raise ValidationError("Chỉ có thể sửa đơn ở trạng thái DRAFT")
         
         pr.priority_level = validated_data.get("priority_level", pr.priority_level)
         pr.urgent_reason = validated_data.get("urgent_reason", pr.urgent_reason)

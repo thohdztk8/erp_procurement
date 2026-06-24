@@ -59,7 +59,7 @@ const fetchOrderDetail = async () => {
 const fetchSuppliers = async () => {
   try {
     const res = await masterService.getSuppliers()
-    suppliersList.value = res.results || []
+    suppliersList.value = res.data.items || []
   } catch (error) {
     console.error(error)
   }
