@@ -39,18 +39,6 @@ const fetchBranches = async () => {
   }
 }
 
-const branches = ref([])
-const selectedBranchId = ref(null)
-
-const fetchBranches = async () => {
-  try {
-    const res = await api.get('/auth/branches')
-    branches.value = res.data || []
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 onMounted(() => {
   fetchApprovedIpos()
   fetchBranches()
