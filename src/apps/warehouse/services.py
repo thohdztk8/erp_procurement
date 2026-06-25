@@ -57,11 +57,38 @@ class WarehouseService:
                 raise ValueError("Bắt buộc có ảnh minh chứng khi qty_failed > 0.")
 
             material_id = item.get("material_id")
+            material_name_other = item.get("material_name_other")
+
+            # Nếu vật tư chưa có trong danh mục chính thức (hàng ngoài danh mục)
+            # Tự động khởi tạo bản ghi trong Materials để theo dõi tồn kho
+            if not material_id and material_name_other and str(material_name_other).strip():
+                from apps.master_data.models import Material, MaterialCategory
+                # Tìm category 'Khác' hoặc category đầu tiên
+                category = MaterialCategory.objects.filter(is_active=True).first()
+                if not category:
+                    category = MaterialCategory.objects.create(
+                        category_code="CAT-OTHER",
+                        category_name="Danh mục khác",
+                        is_active=True
+                    )
+                import uuid
+                material_code = f"MAT-OT-{uuid.uuid4().hex[:8].upper()}"
+                
+                new_material = Material.objects.create(
+                    material_code=material_code,
+                    material_name=material_name_other.strip(),
+                    category=category,
+                    uom="cái",
+                    is_other=True,
+                    is_active=True,
+                    description=f"Tự động tạo từ phiếu nhập kho hàng ngoài danh mục {receipt_code}"
+                )
+                material_id = new_material.material_id
             
             WarehouseReceiptItem.objects.create(
                 receipt=receipt,
                 material_id=material_id,
-                material_name_other=item.get("material_name_other"),
+                material_name_other=material_name_other,
                 qty_ordered=Decimal(str(item["qty_ordered"])),
                 qty_received=qty_received,
                 qty_passed=qty_passed,
