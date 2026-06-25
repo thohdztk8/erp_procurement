@@ -202,4 +202,4 @@ class BranchListView(APIView):
             Response: Đối tượng chứa danh sách chi nhánh.
         """
         qs = Branch.objects.filter(is_active=True).order_by("branch_name")
-        return Response({"items": BranchSerializer(qs, many=True).data})
+        return Response(BranchSerializer(qs, many=True).data)
