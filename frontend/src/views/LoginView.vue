@@ -5,6 +5,7 @@ import { mdiAccount, mdiLock, mdiEye, mdiEyeOff } from '@mdi/js'
 import BaseIcon from '@/components/BaseIcon.vue'
 import LayoutGuest from '@/layouts/LayoutGuest.vue'
 import { authService } from '@/services/api'
+import { getFirstAllowedRoute } from '@/router'
 
 const form = reactive({
   login: '',
@@ -21,7 +22,7 @@ const submit = async () => {
     errorMessage.value = ''
     isLoading.value = true
     await authService.login(form.login, form.pass)
-    router.push('/dashboard')
+    router.push(getFirstAllowedRoute())
   } catch (error) {
     console.error(error)
     errorMessage.value = error.response?.data?.detail || error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại tài khoản và mật khẩu.'

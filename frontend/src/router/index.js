@@ -1,4 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { menuAsideMain } from '@/menuAside.js'
 
 const routes = [
   {
@@ -103,12 +104,32 @@ const router = createRouter({
   },
 })
 
+export const getFirstAllowedRoute = () => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  if (!user.username) return '/login'
+  
+  if (user.username === 'admin' || user.role_code === 'ADMIN') {
+    return '/dashboard'
+  }
+  
+  const userPermissions = user.permissions || []
+  for (const item of menuAsideMain) {
+    if (!item.permissions || item.permissions.length === 0) {
+      return item.to
+    }
+    if (item.permissions.some(p => userPermissions.includes(p))) {
+      return item.to
+    }
+  }
+  return '/profile'
+}
+
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem('access_token')
   if (!isAuthenticated && to.name !== 'login' && to.name !== 'error' && to.name !== 'vendor-portal') {
     next({ name: 'login' })
   } else if (isAuthenticated && (to.name === 'login' || to.path === '/')) {
-    next({ name: 'dashboard' })
+    next(getFirstAllowedRoute())
   } else {
     next()
   }

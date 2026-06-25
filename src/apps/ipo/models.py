@@ -52,8 +52,8 @@ class IPOItem(models.Model):
         OrderItem, on_delete=models.PROTECT, db_column="order_item_id"
     )
     qty_final = models.DecimalField(max_digits=18, decimal_places=4)
-    unit_price = models.DecimalField(max_digits=18, decimal_places=2)
-    total_price = models.DecimalField(max_digits=18, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=18, decimal_places=2, db_column="unit_price_final")
+    total_price = models.DecimalField(max_digits=18, decimal_places=2, db_column="item_total_amount")
 
     class Meta:
         db_table = "IPOItems"
