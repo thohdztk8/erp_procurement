@@ -72,10 +72,35 @@ const handleIpoChange = async () => {
   }
 }
 
-const handleQtyChange = (item) => {
-  // auto default passed to received, failed to 0
-  item.qty_passed = item.qty_received
-  item.qty_failed = 0
+const handleQtyChange = (item, field) => {
+  const qty_received = Math.floor(parseFloat(item.qty_received) || 0)
+  const qty_passed = Math.floor(parseFloat(item.qty_passed) || 0)
+  const qty_failed = Math.floor(parseFloat(item.qty_failed) || 0)
+
+  item.qty_received = qty_received
+
+  if (field === 'received') {
+    let new_passed = qty_received - qty_failed
+    if (new_passed < 0) {
+      new_passed = 0
+      item.qty_failed = qty_received
+    }
+    item.qty_passed = new_passed
+  } else if (field === 'passed') {
+    let new_failed = qty_received - qty_passed
+    if (new_failed < 0) {
+      new_failed = 0
+      item.qty_passed = qty_received
+    }
+    item.qty_failed = new_failed
+  } else if (field === 'failed') {
+    let new_passed = qty_received - qty_failed
+    if (new_passed < 0) {
+      new_passed = 0
+      item.qty_failed = qty_received
+    }
+    item.qty_passed = new_passed
+  }
 }
 
 const handleSubmit = async () => {
@@ -160,13 +185,13 @@ const handleSubmit = async () => {
                 <td class="px-4 py-2 border-r font-medium">{{ it.material_name }}</td>
                 <td class="px-4 py-2 text-right border-r font-bold">{{ it.qty_max }}</td>
                 <td class="px-4 py-2 text-right border-r">
-                  <input type="number" v-model="it.qty_received" class="w-full text-right p-1 border rounded" @input="handleQtyChange(it)" />
+                  <input type="number" v-model.number="it.qty_received" class="w-full text-right p-1 border rounded" @input="handleQtyChange(it, 'received')" min="0" step="1" />
                 </td>
                 <td class="px-4 py-2 text-right border-r">
-                  <input type="number" v-model="it.qty_passed" class="w-full text-right p-1 border rounded bg-gray-50" readonly />
+                  <input type="number" v-model.number="it.qty_passed" class="w-full text-right p-1 border rounded" @input="handleQtyChange(it, 'passed')" min="0" step="1" />
                 </td>
                 <td class="px-4 py-2 text-right">
-                  <input type="number" v-model="it.qty_failed" class="w-full text-right p-1 border rounded" />
+                  <input type="number" v-model.number="it.qty_failed" class="w-full text-right p-1 border rounded" @input="handleQtyChange(it, 'failed')" min="0" step="1" />
                 </td>
               </tr>
             </tbody>
