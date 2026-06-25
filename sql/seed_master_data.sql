@@ -187,6 +187,7 @@ USING (VALUES
     ('CART_CREATE',         N'Tạo giỏ gom hàng',                       'ORDER'),
     ('ORDER_CREATE',        N'Tạo phiên đơn hàng (Order)',             'ORDER'),
     ('ORDER_SEND_QUOTE',    N'Gửi yêu cầu báo giá NCC',               'ORDER'),
+    ('QUOTATION_SELECT',    N'Lựa chọn báo giá tốt nhất',             'ORDER'),
     -- IPO
     ('IPO_CREATE',          N'Tạo đơn đặt hàng nội bộ (IPO)',          'IPO'),
     ('IPO_EDIT',            N'Chỉnh sửa IPO ở trạng thái DRAFT',       'IPO'),
