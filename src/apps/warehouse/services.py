@@ -94,14 +94,24 @@ class WarehouseService:
 
         branch_id = validated_data["branch_id"]
         pr_id = validated_data.get("pr_id")
-        
+        receiver_id = validated_data["receiver_id"]
+        dept_id = validated_data.get("dept_id")
+
+        if not dept_id:
+            from apps.authentication.models import User as AuthUser
+            try:
+                receiver_user = AuthUser.objects.get(user_id=receiver_id)
+                dept_id = receiver_user.dept_id
+            except Exception:
+                dept_id = 1
+
         issue_code = generate_document_code("WI", StockIssue, "issue_code")
         issue = StockIssue.objects.create(
             issue_code=issue_code,
             pr_id=pr_id,
-            dept_id=validated_data["dept_id"],
+            dept_id=dept_id,
             warehouse_keeper=user,
-            receiver_id=validated_data["receiver_id"]
+            receiver_id=receiver_id
         )
 
         for item in validated_data["items"]:
@@ -155,11 +165,25 @@ class WarehouseService:
     def create_return_order(user, validated_data: dict):
         from .models import ReturnOrder, ReturnOrderItem
         
+        supplier_id = validated_data["supplier_id"]
+        receipt_id = validated_data.get("receipt_id")
+        if not receipt_id:
+            from .models import WarehouseReceipt
+            receipt = WarehouseReceipt.objects.filter(ipo__supplier_id=supplier_id).order_by("-received_at").first()
+            if receipt:
+                receipt_id = receipt.receipt_id
+            else:
+                any_receipt = WarehouseReceipt.objects.first()
+                if any_receipt:
+                    receipt_id = any_receipt.receipt_id
+                else:
+                    raise ValueError("Không tìm thấy phiếu nhập kho nào để liên kết.")
+
         return_code = generate_document_code("RO", ReturnOrder, "return_code")
         return_order = ReturnOrder.objects.create(
             return_code=return_code,
-            supplier_id=validated_data["supplier_id"],
-            receipt_id=validated_data["receipt_id"],
+            supplier_id=supplier_id,
+            receipt_id=receipt_id,
             created_by=user,
             return_status="DRAFT"
         )

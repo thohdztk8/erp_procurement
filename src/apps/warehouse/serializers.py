@@ -118,7 +118,7 @@ class ReturnItemCreateSerializer(serializers.Serializer):
 
 class ReturnOrderCreateSerializer(serializers.Serializer):
     supplier_id = serializers.IntegerField()
-    receipt_id = serializers.IntegerField()
+    receipt_id = serializers.IntegerField(required=False, allow_null=True)
     items = ReturnItemCreateSerializer(many=True, min_length=1)
 
 
@@ -129,7 +129,7 @@ class IssueItemCreateSerializer(serializers.Serializer):
 class IssueCreateSerializer(serializers.Serializer):
     pr_id = serializers.IntegerField(required=False, allow_null=True)
     branch_id = serializers.IntegerField()
-    dept_id = serializers.IntegerField()
+    dept_id = serializers.IntegerField(required=False, allow_null=True)
     receiver_id = serializers.IntegerField()
     items = IssueItemCreateSerializer(many=True, min_length=1)
 
