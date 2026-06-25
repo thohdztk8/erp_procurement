@@ -142,10 +142,16 @@ class StockIssueSerializer(serializers.ModelSerializer):
     warehouse_keeper_name = serializers.CharField(source="warehouse_keeper.full_name", read_only=True)
     receiver_name = serializers.CharField(source="receiver.full_name", read_only=True)
     items = StockIssueItemSerializer(many=True, read_only=True)
+    is_confirmed = serializers.SerializerMethodField()
 
     class Meta:
         model = StockIssue
         fields = [
             "issue_id", "issue_code", "pr_id", "dept_id", 
-            "warehouse_keeper_name", "receiver_name", "issued_at", "items"
+            "warehouse_keeper_name", "receiver_name", "issued_at", "items", "is_confirmed"
         ]
+
+    def get_is_confirmed(self, obj) -> bool:
+        # Nếu có bất kỳ item nào đã được ghi nhận đánh giá chất lượng (quality_rating không null) thì coi như đã xác nhận
+        return obj.items.filter(quality_rating__isnull=False).exists()
+

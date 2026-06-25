@@ -217,10 +217,10 @@ const changeReturnPage = (page) => {
             <tr v-for="iss in issues" :key="iss.issue_id" class="border-b">
               <td class="px-6 py-3 font-bold text-blue-600">{{ iss.issue_code }}</td>
               <td class="px-6 py-3">PR#{{ iss.pr_id || '-' }}</td>
-              <td class="px-6 py-3">{{ new Date(iss.issue_at).toLocaleDateString('vi-VN') }}</td>
+              <td class="px-6 py-3">{{ new Date(iss.issued_at).toLocaleDateString('vi-VN') }}</td>
               <td class="px-6 py-3 text-right">
                 <BaseButton v-if="!iss.is_confirmed" color="success" label="Xác nhận" small @click="handleConfirmIssue(iss.issue_id)" />
-                <span v-else class="text-green-600 font-semibold text-xs">Đã nhận</span>
+                <span v-else class="text-gray-500 font-semibold text-xs">Đã nhận</span>
               </td>
             </tr>
           </tbody>
