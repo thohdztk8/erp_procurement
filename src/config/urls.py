@@ -39,6 +39,15 @@ urlpatterns = [
     path(f"{API}/payment/", include("apps.invoice.urls")),
 ]
 
+from apps.invoice.views_notes import CreditNoteListCreateView, DebitNoteListCreateView
+from apps.invoice.views_report import DashboardSummaryView
+
+urlpatterns += [
+    path(f"{API}/credit-notes", CreditNoteListCreateView.as_view(), name="credit-note-list-create"),
+    path(f"{API}/debit-notes", DebitNoteListCreateView.as_view(), name="debit-note-list-create"),
+    path(f"{API}/reports/dashboard-summary", DashboardSummaryView.as_view(), name="dashboard-summary"),
+]
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

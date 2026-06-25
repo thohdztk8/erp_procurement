@@ -10,9 +10,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     LoginSerializer, UserProfileSerializer, 
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
-    RoleSerializer, PermissionSerializer
+    RoleSerializer, PermissionSerializer, BranchSerializer
 )
-from .models import User, Role, Permission
+from .models import User, Role, Permission, Branch
 from .services import AuthService
 from core.pagination.standard import StandardResultsPagination
 
@@ -182,3 +182,24 @@ class PermissionListView(APIView):
     def get(self, request):
         qs = Permission.objects.all().order_by("module_group", "permission_name")
         return Response({"items": PermissionSerializer(qs, many=True).data})
+
+
+class BranchListView(APIView):
+    """
+    GET /api/v2/auth/branches
+    Lấy danh sách các chi nhánh đang hoạt động trong hệ thống.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Xử lý yêu cầu GET trả về toàn bộ chi nhánh.
+        
+        Parameters:
+            request (HttpRequest): Request object từ DRF.
+            
+        Returns:
+            Response: Đối tượng chứa danh sách chi nhánh.
+        """
+        qs = Branch.objects.filter(is_active=True).order_by("branch_name")
+        return Response({"items": BranchSerializer(qs, many=True).data})

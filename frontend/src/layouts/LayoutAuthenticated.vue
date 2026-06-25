@@ -34,7 +34,7 @@ const filteredMenuAsideMain = computed(() => {
     if (!item.permissions || item.permissions.length === 0) {
       return true
     }
-    if (user.username === 'admin') {
+    if (user.username === 'admin' || user.role_code === 'ADMIN') {
       return true
     }
     const userPermissions = user.permissions || []

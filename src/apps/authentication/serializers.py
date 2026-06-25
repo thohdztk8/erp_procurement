@@ -3,7 +3,7 @@ import datetime
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import User
+from .models import User, Branch
 
 
 class LoginSerializer(serializers.Serializer):
@@ -127,3 +127,12 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["full_name", "email", "phone", "role", "branch", "dept", "is_active"]
+
+
+class BranchSerializer(serializers.ModelSerializer):
+    """
+    Serializer hiển thị thông tin chi tiết của chi nhánh (Branch).
+    """
+    class Meta:
+        model = Branch
+        fields = ["branch_id", "branch_code", "branch_name", "address", "is_active"]

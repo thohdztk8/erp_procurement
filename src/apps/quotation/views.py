@@ -22,7 +22,7 @@ logger = logging.getLogger("apps")
 
 class InviteQuotationView(APIView):
     """POST /api/v2/quotation/invite"""
-    permission_classes = [IsAuthenticated, require_permission("QUOTATION_INVITE")]
+    permission_classes = [IsAuthenticated, require_permission("ORDER_SEND_QUOTE")]
 
     def post(self, request):
         serializer = InviteQuotationSerializer(data=request.data)

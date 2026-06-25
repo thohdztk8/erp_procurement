@@ -140,22 +140,26 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.username
 
     def has_permission(self, permission_code: str) -> bool:
-        if self.is_superuser:
+        """Kiểm tra người dùng có quyền permission_code hay không."""
+        if self.is_superuser or (self.role and self.role.role_code == "ADMIN"):
             return True
-        if not self.role_id:
-            return False
-        return RolePermission.objects.filter(
-            role_id=self.role_id,
-            permission__permission_code=permission_code,
-        ).exists()
+        return permission_code in self.get_permission_codes()
 
     def get_permission_codes(self) -> list[str]:
-        if not self.role_id:
-            return []
-        return list(
-            RolePermission.objects.filter(role_id=self.role_id)
-            .values_list("permission__permission_code", flat=True)
-        )
+        """Lấy danh sách mã quyền được gán cho người dùng (có sử dụng cache thực thể)."""
+        if not hasattr(self, "_perm_codes_cache"):
+            if not self.role_id:
+                self._perm_codes_cache = []
+            elif self.role and self.role.role_code == "ADMIN":
+                self._perm_codes_cache = list(
+                    Permission.objects.all().values_list("permission_code", flat=True)
+                )
+            else:
+                self._perm_codes_cache = list(
+                    RolePermission.objects.filter(role_id=self.role_id)
+                    .values_list("permission__permission_code", flat=True)
+                )
+        return self._perm_codes_cache
 
 
 # ── AuditLogs ─────────────────────────────────────────────────

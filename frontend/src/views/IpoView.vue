@@ -60,7 +60,7 @@ const handleSubmit = async (id) => {
 }
 
 const isApproverRole = computed(() => {
-  return currentUser.value.permissions?.includes('IPO_APPROVE') || currentUser.value.username === 'admin'
+  return currentUser.value.permissions?.includes('IPO_APPROVE') || currentUser.value.username === 'admin' || currentUser.value.role_code === 'ADMIN'
 })
 
 const changeTab = (tab) => {

@@ -61,6 +61,8 @@ class ProcurementAPIRenderer(JSONRenderer):
                         "total_pages": total_pages,
                     },
                 },
+                "results": data["results"],
+                "count": total,
                 "timestamp": _now(),
             }
         else:

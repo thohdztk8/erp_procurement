@@ -21,7 +21,13 @@ from .services import WarehouseService
 
 class ReceiptCreateView(APIView):
     """POST /api/v2/warehouse/receipt"""
-    permission_classes = [IsAuthenticated, require_permission("WH_RECEIPT")]
+    permission_classes = [IsAuthenticated, require_permission("WH_RECEIPT_CREATE")]
+
+    def get(self, request):
+        qs = WarehouseReceipt.objects.select_related("warehouse_keeper").prefetch_related("items").order_by("-received_at")
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(qs, request)
+        return paginator.get_paginated_response(ReceiptSerializer(page, many=True).data)
 
     def post(self, request):
         serializer = ReceiptCreateSerializer(data=request.data)
@@ -93,7 +99,7 @@ class WarehouseReturnListView(APIView):
 
 class WarehouseReturnCreateView(APIView):
     """POST /api/v2/warehouse/return-orders"""
-    permission_classes = [IsAuthenticated, require_permission("WH_RETURN")]
+    permission_classes = [IsAuthenticated, require_permission("WH_RETURN_CREATE")]
 
     def post(self, request):
         serializer = ReturnOrderCreateSerializer(data=request.data)
@@ -112,7 +118,7 @@ class WarehouseReturnCreateView(APIView):
 
 class IssueCreateView(APIView):
     """POST /api/v2/warehouse/issues"""
-    permission_classes = [IsAuthenticated, require_permission("WH_ISSUE")]
+    permission_classes = [IsAuthenticated, require_permission("WH_ISSUE_CREATE")]
 
     def post(self, request):
         serializer = IssueCreateSerializer(data=request.data)

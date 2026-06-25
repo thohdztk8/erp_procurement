@@ -112,3 +112,53 @@ class SupplierEvaluationCreateSerializer(serializers.Serializer):
     period_value = serializers.CharField(max_length=20)
     period_start_date = serializers.DateTimeField()
     period_end_date = serializers.DateTimeField()
+
+
+class CreditNoteSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source="supplier.supplier_name", read_only=True)
+    invoice_number = serializers.CharField(source="invoice.invoice_number", read_only=True)
+
+    class Meta:
+        model = CreditNote
+        fields = [
+            "credit_note_id", "credit_note_code", "credit_note_number", "supplier_id", "supplier_name",
+            "invoice_id", "invoice_number", "return_order_id", "credit_amount_before_tax",
+            "credit_tax_amount", "credit_total_amount", "credit_date", "reason",
+            "credit_pdf_path", "applied_status", "applied_to_payment_id", "created_at"
+        ]
+
+
+class CreditNoteCreateSerializer(serializers.Serializer):
+    credit_note_number = serializers.CharField(max_length=50)
+    supplier_id = serializers.IntegerField()
+    invoice_id = serializers.IntegerField()
+    return_id = serializers.IntegerField(required=False, allow_null=True)
+    credit_amount_before_tax = serializers.DecimalField(max_digits=18, decimal_places=2)
+    credit_tax_amount = serializers.DecimalField(max_digits=18, decimal_places=2)
+    credit_total_amount = serializers.DecimalField(max_digits=18, decimal_places=2)
+    credit_date = serializers.DateTimeField()
+    reason = serializers.CharField(max_length=500)
+    credit_pdf_path = serializers.CharField(max_length=500, required=False, allow_blank=True)
+
+
+class DebitNoteSerializer(serializers.ModelSerializer):
+    supplier_name = serializers.CharField(source="supplier.supplier_name", read_only=True)
+    invoice_number = serializers.CharField(source="invoice.invoice_number", read_only=True)
+
+    class Meta:
+        model = DebitNote
+        fields = [
+            "debit_note_id", "debit_note_code", "debit_note_number", "supplier_id", "supplier_name",
+            "invoice_id", "invoice_number", "debit_amount", "debit_date", "reason",
+            "debit_pdf_path", "applied_status", "applied_to_payment_id", "created_at"
+        ]
+
+
+class DebitNoteCreateSerializer(serializers.Serializer):
+    debit_note_number = serializers.CharField(max_length=50)
+    supplier_id = serializers.IntegerField()
+    invoice_id = serializers.IntegerField()
+    debit_amount = serializers.DecimalField(max_digits=18, decimal_places=2)
+    debit_date = serializers.DateTimeField()
+    reason = serializers.CharField(max_length=500)
+    debit_pdf_path = serializers.CharField(max_length=500, required=False, allow_blank=True)
