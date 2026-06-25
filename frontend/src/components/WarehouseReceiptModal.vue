@@ -60,9 +60,9 @@ const handleIpoChange = async () => {
         material_id: it.order_item?.material_id || it.material_id,
         material_name_other: it.order_item?.material_name_other || it.material_name_other,
         material_name: it.material_name || it.material?.material_name || it.order_item?.material?.material_name || 'Khác',
-        qty_max: parseFloat(it.qty),
-        qty_received: parseFloat(it.qty),
-        qty_passed: parseFloat(it.qty),
+        qty_max: parseFloat(it.qty_final),
+        qty_received: parseFloat(it.qty_final),
+        qty_passed: parseFloat(it.qty_final),
         qty_failed: 0,
         photo_paths: []
       }))
