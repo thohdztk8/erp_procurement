@@ -318,7 +318,8 @@ JOIN dbo.Permissions p ON p.permission_code IN (
     'SUPPLIER_CREATE','SUPPLIER_EDIT',
     'MATERIAL_CREATE','MATERIAL_EDIT',
     'WH_INVENTORY_VIEW',
-    'REPORT_VIEW'
+    'REPORT_VIEW',
+    'QUOTATION_SELECT'
 )
 WHERE r.role_code = 'BUYER'
   AND NOT EXISTS (
