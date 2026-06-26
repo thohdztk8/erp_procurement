@@ -1,4 +1,3 @@
-import hashlib
 import logging
 
 from rest_framework import status
@@ -7,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.permissions.rbac import require_permission
-from core.utils.token_generator import verify_vendor_token
+from core.utils.token_generator import _hash, verify_vendor_token
 
 from .models import Quotation, QuotationRequest, QuotationToken
 from .serializers import (
@@ -59,9 +58,13 @@ class VendorPortalDetailView(APIView):
         from django.utils import timezone
         try:
             token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(
-                token=hashlib.sha256(token_val.encode("utf-8")).hexdigest()
+                token=_hash(token_val)
             )
         except QuotationToken.DoesNotExist:
+            return Response({"detail": "Token không hợp lệ."}, status=400)
+
+        # Xác thực lại bằng verify_vendor_token để chống timing attack
+        if not verify_vendor_token(token_val, token_obj.token):
             return Response({"detail": "Token không hợp lệ."}, status=400)
             
         if token_obj.is_used:

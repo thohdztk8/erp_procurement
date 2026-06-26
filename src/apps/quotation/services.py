@@ -13,7 +13,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from core.utils.audit import write_audit_log
-from core.utils.token_generator import generate_vendor_token
+from core.utils.token_generator import generate_vendor_token, _hash, verify_vendor_token
 
 from .models import (
     Quotation, QuotationItem, QuotationRequest,
@@ -106,7 +106,7 @@ class QuotationService:
         Tự động quản lý version, khóa token sau khi submit.
         """
         token_obj = QuotationToken.objects.select_related("q_request__order", "q_request__supplier").get(
-            token=hashlib.sha256(token_value.encode("utf-8")).hexdigest()
+            token=_hash(token_value)
         )
         q_request = token_obj.q_request
 

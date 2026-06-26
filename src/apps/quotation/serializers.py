@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Quotation, QuotationItem, QuotationRequest, QuotationToken, QuotationVersion
-
+from core.utils.token_generator import _hash
 
 class InviteQuotationSerializer(serializers.Serializer):
     order_id = serializers.IntegerField()
@@ -34,11 +34,10 @@ class VendorPortalSubmitSerializer(serializers.Serializer):
     items = QuotationItemSubmitSerializer(many=True, min_length=1)
 
     def validate_token(self, value):
-        import hashlib
         from django.utils import timezone
         try:
             token_obj = QuotationToken.objects.select_related("q_request").get(
-                token=hashlib.sha256(value.encode("utf-8")).hexdigest()
+                token=_hash(value)
             )
         except QuotationToken.DoesNotExist:
             raise serializers.ValidationError("Token không hợp lệ.")
