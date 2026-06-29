@@ -2,7 +2,8 @@ from django.urls import path
 
 from .views import (
     HealthCheckView, LoginView, LogoutView, ProfileView, RefreshTokenView,
-    UserListView, UserDetailView, UserDeactivateView, RoleListView, PermissionListView
+    UserListView, UserDetailView, UserDeactivateView, RoleListView, PermissionListView,
+    BranchListView
 )
 # Prefix: /api/v2/auth/
 urlpatterns = [
@@ -15,6 +16,7 @@ urlpatterns = [
     path("users/<int:pk>/deactivate", UserDeactivateView.as_view(), name="user-deactivate"),
     path("roles", RoleListView.as_view(), name="role-list"),
     path("permissions", PermissionListView.as_view(), name="permission-list"),
+    path("branches", BranchListView.as_view(), name="branch-list"),
 ]
 # Health check — mount riêng ở /api/v2/health/
 health_urlpatterns = [

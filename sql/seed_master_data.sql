@@ -154,7 +154,8 @@ USING (VALUES
     (7, 'WAREHOUSE_KEEP', N'Thủ kho',                    N'Nhập kho, xuất kho, phiếu trả hàng'),
     (8, 'QC_STAFF',       N'Nhân viên QC',               N'Kiểm định hàng nhập, ghi nhận qty_passed/qty_failed'),
     (9, 'REQUESTER',      N'Nhân viên yêu cầu mua hàng', N'Tạo đơn PR, theo dõi trạng thái PR của mình'),
-    (10, 'VIEWER',         N'Xem báo cáo',                N'Chỉ đọc dữ liệu, không tạo hay duyệt chứng từ')
+    (10, 'VIEWER',         N'Xem báo cáo',                N'Chỉ đọc dữ liệu, không tạo hay duyệt chứng từ'),
+    (11, 'BUYER_HEAD',     N'Trưởng phòng mua hàng',      N'Bao gồm quyền của trưởng phòng và của bên mua hàng')
 ) AS src (role_id, role_code, role_name, description)
 ON tgt.role_code = src.role_code
 WHEN NOT MATCHED THEN
@@ -186,7 +187,7 @@ USING (VALUES
     ('CART_CREATE',         N'Tạo giỏ gom hàng',                       'ORDER'),
     ('ORDER_CREATE',        N'Tạo phiên đơn hàng (Order)',             'ORDER'),
     ('ORDER_SEND_QUOTE',    N'Gửi yêu cầu báo giá NCC',               'ORDER'),
-    ('QUOTATION_SELECT',    N'Lựa chọn báo giá tốt nhất',               'ORDER'),
+    ('QUOTATION_SELECT',    N'Lựa chọn báo giá tốt nhất',             'ORDER'),
     -- IPO
     ('IPO_CREATE',          N'Tạo đơn đặt hàng nội bộ (IPO)',          'IPO'),
     ('IPO_EDIT',            N'Chỉnh sửa IPO ở trạng thái DRAFT',       'IPO'),
@@ -262,7 +263,8 @@ JOIN dbo.Permissions p ON p.permission_code IN (
     'SUPPLIER_CREATE','SUPPLIER_EDIT','SUPPLIER_DEACTIVATE','SUPPLIER_EVALUATE',
     'MATERIAL_CREATE','MATERIAL_EDIT',
     'REPORT_VIEW','REPORT_EXPORT','AUDIT_VIEW',
-    'CONFIG_VIEW','CONFIG_EDIT','TEMPLATE_EDIT'
+    'CONFIG_VIEW','CONFIG_EDIT','TEMPLATE_EDIT',
+    'QUOTATION_SELECT'
 )
 WHERE r.role_code = 'GD'
   AND NOT EXISTS (
@@ -280,7 +282,8 @@ JOIN dbo.Permissions p ON p.permission_code IN (
     'IPO_APPROVE','IPO_REJECT','IPO_VIEW_ALL',
     'INV_OVERRIDE','PAYMENT_APPROVE',
     'SUPPLIER_EVALUATE',
-    'REPORT_VIEW','REPORT_EXPORT'
+    'REPORT_VIEW','REPORT_EXPORT',
+    'QUOTATION_SELECT'
 )
 WHERE r.role_code = 'PGD'
   AND NOT EXISTS (
@@ -299,7 +302,8 @@ JOIN dbo.Permissions p ON p.permission_code IN (
     'IPO_VIEW_ALL',
     'SUPPLIER_EVALUATE',
     'WH_INVENTORY_VIEW',
-    'REPORT_VIEW','REPORT_EXPORT'
+    'REPORT_VIEW','REPORT_EXPORT',
+    'QUOTATION_SELECT'
 )
 WHERE r.role_code = 'DEPT_HEAD'
   AND NOT EXISTS (
@@ -319,7 +323,8 @@ JOIN dbo.Permissions p ON p.permission_code IN (
     'SUPPLIER_CREATE','SUPPLIER_EDIT',
     'MATERIAL_CREATE','MATERIAL_EDIT',
     'WH_INVENTORY_VIEW',
-    'REPORT_VIEW'
+    'REPORT_VIEW',
+    'QUOTATION_SELECT'
 )
 WHERE r.role_code = 'BUYER'
   AND NOT EXISTS (
@@ -406,6 +411,24 @@ WHERE r.role_code = 'VIEWER'
   );
 GO
 
+-- BUYER_HEAD — Trưởng phòng mua hàng
+INSERT INTO dbo.RolePermissions (role_id, permission_id)
+SELECT r.role_id, p.permission_id
+FROM dbo.Roles r
+JOIN dbo.Permissions p ON p.permission_code IN (
+    'CART_CREATE', 'IPO_APPROVE', 'IPO_CREATE', 'IPO_EDIT', 'IPO_REJECT', 'IPO_VIEW_ALL', 
+    'MATERIAL_CREATE', 'MATERIAL_EDIT', 'ORDER_CREATE', 'ORDER_SEND_QUOTE', 
+    'PR_APPROVE', 'PR_CANCEL', 'PR_CREATE', 'PR_EDIT', 'PR_REJECT', 'PR_SUBMIT', 'PR_VIEW_ALL', 
+    'QUOTATION_SELECT', 'REPORT_EXPORT', 'REPORT_VIEW', 'SUPPLIER_CREATE', 'SUPPLIER_EDIT', 
+    'SUPPLIER_EVALUATE', 'WH_INVENTORY_VIEW'
+)
+WHERE r.role_code = 'BUYER_HEAD'
+  AND NOT EXISTS (
+      SELECT 1 FROM dbo.RolePermissions rp
+      WHERE rp.role_id = r.role_id AND rp.permission_id = p.permission_id
+  );
+GO
+
 PRINT '   Roles / Permissions / RolePermissions seeding done.';
 GO
 
@@ -435,7 +458,7 @@ GO
 INSERT INTO [dbo].[Users] ([user_id], [username], [password], [full_name], [email], [phone], [branch_id], [dept_id], [role_id], [is_active], [is_superuser], [is_staff], [last_login], [login_fail_count], [locked_until], [created_at]) VALUES (N'3', N'pgd_hcm', N'bcrypt_sha256$$2b$12$LVljAqrzR9X1ZYzKq/SoaOoDBimB6zlofAUCYpiux3.BHXd09EhR.', N'Trần Thị Mai', N'pgd.hcm@company.vn', N'0901000003', N'2', N'1', N'3', N'1', N'0', N'0', NULL, N'0', NULL, N'2026-06-02 08:49:06.4100000')
 GO
 
-INSERT INTO [dbo].[Users] ([user_id], [username], [password], [full_name], [email], [phone], [branch_id], [dept_id], [role_id], [is_active], [is_superuser], [is_staff], [last_login], [login_fail_count], [locked_until], [created_at]) VALUES (N'4', N'tp_muahang', N'bcrypt_sha256$$2b$12$LVljAqrzR9X1ZYzKq/SoaOoDBimB6zlofAUCYpiux3.BHXd09EhR.', N'Lê Minh Tuấn', N'tp.mh@company.vn', N'0901000004', N'1', N'2', N'4', N'1', N'0', N'0', NULL, N'0', NULL, N'2026-06-02 08:49:06.4100000')
+INSERT INTO [dbo].[Users] ([user_id], [username], [password], [full_name], [email], [phone], [branch_id], [dept_id], [role_id], [is_active], [is_superuser], [is_staff], [last_login], [login_fail_count], [locked_until], [created_at]) VALUES (N'4', N'tp_muahang', N'bcrypt_sha256$$2b$12$LVljAqrzR9X1ZYzKq/SoaOoDBimB6zlofAUCYpiux3.BHXd09EhR.', N'Lê Minh Tuấn', N'tp.mh@company.vn', N'0901000004', N'1', N'2', N'11', N'1', N'0', N'0', NULL, N'0', NULL, N'2026-06-02 08:49:06.4100000')
 GO
 
 INSERT INTO [dbo].[Users] ([user_id], [username], [password], [full_name], [email], [phone], [branch_id], [dept_id], [role_id], [is_active], [is_superuser], [is_staff], [last_login], [login_fail_count], [locked_until], [created_at]) VALUES (N'5', N'tp_ketoan', N'bcrypt_sha256$$2b$12$LVljAqrzR9X1ZYzKq/SoaOoDBimB6zlofAUCYpiux3.BHXd09EhR.', N'Phạm Thị Hồng', N'tp.kt@company.vn', N'0901000005', N'1', N'3', N'4', N'1', N'0', N'0', NULL, N'0', NULL, N'2026-06-02 08:49:06.4100000')

@@ -33,10 +33,15 @@ class IPOCreateSerializer(serializers.Serializer):
 
 class IPOItemSerializer(serializers.ModelSerializer):
     material_name = serializers.SerializerMethodField()
+    material_id = serializers.IntegerField(source="order_item.material_id", read_only=True)
+    material_name_other = serializers.CharField(source="order_item.material_name_other", read_only=True)
 
     class Meta:
         model = IPOItem
-        fields = ["ipo_item_id", "order_item_id", "material_name", "qty_final", "unit_price", "total_price"]
+        fields = [
+            "ipo_item_id", "order_item_id", "material_name", "material_id",
+            "material_name_other", "qty_final", "unit_price", "total_price"
+        ]
 
     def get_material_name(self, obj):
         oi = obj.order_item

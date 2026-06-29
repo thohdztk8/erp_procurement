@@ -48,7 +48,7 @@ const fetchPRs = async () => {
     stats.value.approved = allPrs.filter(p => p.pr_status === 'APPROVED').length
 
     // Nếu user có quyền duyệt, lấy danh sách chờ duyệt
-    const isApprover = currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin'
+    const isApprover = currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin' || currentUser.value.role_code === 'ADMIN'
     if (isApprover) {
       const pendingRes = await prService.getPendingPRs({ page: pendingPage.value })
       pendingPrs.value = pendingRes.data.items || []
@@ -147,11 +147,11 @@ const showApproveForm = computed(() => {
   if (!prDetailData.value) return false
   const pr = prDetailData.value.pr
   return pr.pr_status === 'PENDING' && 
-    (currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin')
+    (currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin' || currentUser.value.role_code === 'ADMIN')
 })
 
 const isApproverRole = computed(() => {
-  return currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin'
+  return currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin' || currentUser.value.role_code === 'ADMIN'
 })
 </script>
 

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.pagination.standard import StandardResultsPagination
+from core.permissions.rbac import HasPermissionCode
 
 from .models import ApprovalWorkflow, Material, Supplier, SystemConfig
 from .serializers import (
@@ -17,7 +18,10 @@ from .serializers import (
 
 class MaterialListView(APIView):
     """GET/POST /api/v2/master/materials"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPermissionCode]
+    method_permissions = {
+        "POST": "MATERIAL_CREATE"
+    }
 
     def get(self, request):
         qs = Material.objects.filter(is_active=True).select_related("category")
@@ -45,11 +49,6 @@ class MaterialListView(APIView):
         Returns:
         - Response: 201 Created với thông tin vật tư được tạo hoặc 403 Forbidden nếu không có quyền.
         """
-        if not request.user.has_permission("MATERIAL_CREATE"):
-            return Response(
-                {"success": False, "message": "Bạn không có quyền tạo vật tư."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         serializer = MaterialSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -75,7 +74,10 @@ class MaterialDetailView(APIView):
 
 class SupplierListView(APIView):
     """GET/POST /api/v2/master/suppliers"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPermissionCode]
+    method_permissions = {
+        "POST": "SUPPLIER_CREATE"
+    }
 
     def get(self, request):
         qs = Supplier.objects.filter(is_active=True)
@@ -99,11 +101,6 @@ class SupplierListView(APIView):
         Returns:
         - Response: 201 Created với thông tin nhà cung cấp được tạo hoặc 403 Forbidden nếu không có quyền.
         """
-        if not request.user.has_permission("SUPPLIER_CREATE"):
-            return Response(
-                {"success": False, "message": "Bạn không có quyền tạo nhà cung cấp."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         serializer = SupplierSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

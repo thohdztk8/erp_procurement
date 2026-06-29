@@ -17,6 +17,7 @@ class TestIQCQtyBalance:
     def test_raises_when_balance_violated(self):
         s = self._serialize({
             "ipo_item_id": 1,
+            "qty_ordered": "10.0000",
             "qty_received": "10.0000",
             "qty_passed": "8.0000",
             "qty_failed": "3.0000",   # 8+3 ≠ 10
@@ -30,6 +31,7 @@ class TestIQCQtyBalance:
     def test_raises_when_failed_without_photos(self):
         s = self._serialize({
             "ipo_item_id": 1,
+            "qty_ordered": "10.0000",
             "qty_received": "10.0000",
             "qty_passed": "7.0000",
             "qty_failed": "3.0000",
@@ -40,6 +42,7 @@ class TestIQCQtyBalance:
     def test_passes_when_balance_correct_all_passed(self):
         s = self._serialize({
             "ipo_item_id": 1,
+            "qty_ordered": "10.0000",
             "qty_received": "10.0000",
             "qty_passed": "10.0000",
             "qty_failed": "0.0000",
@@ -49,6 +52,7 @@ class TestIQCQtyBalance:
     def test_passes_when_failed_with_photos(self):
         s = self._serialize({
             "ipo_item_id": 1,
+            "qty_ordered": "10.0000",
             "qty_received": "10.0000",
             "qty_passed": "7.0000",
             "qty_failed": "3.0000",
