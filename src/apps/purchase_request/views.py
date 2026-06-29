@@ -95,7 +95,7 @@ class PRDetailView(APIView):
 
         approval_steps = DocumentApprovalProgress.objects.filter(
             document_type="PR", document_id=pk
-        ).select_related("approver").order_by("step_sequence")
+        ).exclude(approval_status="SKIPPED").select_related("approver").order_by("step_sequence")
 
         return Response({
             "data": {

@@ -49,9 +49,11 @@ const fetchData = async () => {
       const detailRes = await prService.getPRDetail(pr.pr_id)
       const prDetail = detailRes.data.pr
       for (const item of prDetail.items) {
-        if (item.item_status === 'PENDING') {
+        const qtyRemaining = parseFloat(item.qty_requested) - parseFloat(item.qty_ordered || 0)
+        if (item.item_status === 'PENDING' && qtyRemaining > 0) {
           items.push({
             ...item,
+            qty_remaining: qtyRemaining,
             pr_code: prDetail.pr_code,
             requester_name: prDetail.requester_name
           })
@@ -204,7 +206,7 @@ const handleCartConverted = () => {
                 </td>
                 <td class="px-6 py-3 font-semibold">{{ it.pr_code }}</td>
                 <td class="px-6 py-3 font-medium text-gray-900 dark:text-white">{{ it.material_name }}</td>
-                <td class="px-6 py-3 text-right font-semibold">{{ parseFloat(it.qty_requested) }}</td>
+                <td class="px-6 py-3 text-right font-semibold">{{ parseFloat(it.qty_remaining) }}</td>
                 <td class="px-6 py-3">{{ it.requester_name }}</td>
                 <td class="px-6 py-3">{{ new Date(it.required_deadline).toLocaleDateString('vi-VN') }}</td>
               </tr>

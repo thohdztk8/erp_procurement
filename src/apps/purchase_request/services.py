@@ -100,25 +100,23 @@ class PRService:
         pr.pr_status = "PENDING"
         pr.save(update_fields=["pr_status", "updated_at"])
 
-        # Tạo các bước phê duyệt từ workflow
+        # Tạo các bước phê duyệt từ workflow (mỗi step_sequence chỉ tạo 1 record)
         steps = list(workflow.steps.order_by("step_sequence"))
         if not steps:
             from rest_framework.exceptions import ValidationError
             raise ValidationError("Luồng phê duyệt phù hợp không có bước duyệt nào được cấu hình. Vui lòng liên hệ quản trị viên.")
 
-        old_status = pr.pr_status
-        pr.pr_status = "PENDING"
-        pr.save(update_fields=["pr_status", "updated_at"])
-
-        progress_records = [
-            DocumentApprovalProgress(
-                document_type="PR",
-                document_id=pr.pr_id,
-                step_sequence=step.step_sequence,
-                approval_status="PENDING",
-            )
-            for step in steps
-        ]
+        seen_sequences = set()
+        progress_records = []
+        for step in steps:
+            if step.step_sequence not in seen_sequences:
+                seen_sequences.add(step.step_sequence)
+                progress_records.append(DocumentApprovalProgress(
+                    document_type="PR",
+                    document_id=pr.pr_id,
+                    step_sequence=step.step_sequence,
+                    approval_status="PENDING",
+                ))
         DocumentApprovalProgress.objects.bulk_create(progress_records)
 
         PRStatusHistory.objects.create(
@@ -181,7 +179,16 @@ class PRService:
         current_step.save()
 
         if action == "REJECT":
-            # Từ chối → toàn bộ chứng từ REJECTED
+            # Từ chối → bỏ qua tất cả bước còn lại cùng step_sequence
+            DocumentApprovalProgress.objects.filter(
+                document_type="PR",
+                document_id=pr.pr_id,
+                approval_status="PENDING",
+                step_sequence=current_step.step_sequence,
+            ).exclude(progress_id=current_step.progress_id).update(
+                approval_status="SKIPPED",
+                action_date=timezone.now(),
+            )
             pr.pr_status = "REJECTED"
             pr.save(update_fields=["pr_status", "updated_at"])
             PRStatusHistory.objects.create(
@@ -189,6 +196,17 @@ class PRService:
                 changed_by=approver, note=comment,
             )
         else:
+            # Cùng cấp chỉ cần 1 người duyệt → bỏ qua các role khác cùng step
+            DocumentApprovalProgress.objects.filter(
+                document_type="PR",
+                document_id=pr.pr_id,
+                approval_status="PENDING",
+                step_sequence=current_step.step_sequence,
+            ).exclude(progress_id=current_step.progress_id).update(
+                approval_status="SKIPPED",
+                action_date=timezone.now(),
+            )
+
             # Kiểm tra còn bước tiếp theo không
             next_step = DocumentApprovalProgress.objects.filter(
                 document_type="PR",
