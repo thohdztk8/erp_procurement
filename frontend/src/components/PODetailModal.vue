@@ -194,7 +194,7 @@ const sendQuotation = async () => {
               <BaseButton v-else color="success" :icon="mdiContentSave" label="Lưu thay đổi" :disabled="isSubmitting" @click="saveEdit" />
             </div>
             <BaseButton 
-              v-if="order.order_status === 'DRAFT' || order.order_status === 'QUOTING'"
+              v-if="(order.order_status === 'DRAFT' || order.order_status === 'QUOTING') && order.suppliers.length > 0 && !isEditing"
               color="warning" 
               label="Gửi yêu cầu báo giá" 
               @click="showQuotationModal = true" 

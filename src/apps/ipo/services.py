@@ -151,6 +151,14 @@ class IPOService:
         if action == "REJECT":
             ipo.ipo_status = "REJECTED"
         else:
+            DocumentApprovalProgress.objects.filter(
+                document_type="IPO",
+                document_id=ipo.ipo_id,
+                step_sequence=current_step.step_sequence,
+                approval_status="PENDING",
+            ).exclude(progress_id=current_step.progress_id).update(
+                approval_status="SKIPPED"
+            )
             has_next = DocumentApprovalProgress.objects.filter(
                 document_type="IPO",
                 document_id=ipo.ipo_id,

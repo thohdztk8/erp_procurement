@@ -80,7 +80,7 @@ class PRItem(models.Model):
 
 
 class DocumentApprovalProgress(models.Model):
-    STATUS_CHOICES = [("PENDING", "Chờ"), ("APPROVED", "Duyệt"), ("REJECTED", "Từ chối")]
+    STATUS_CHOICES = [("PENDING", "Chờ"), ("APPROVED", "Duyệt"), ("REJECTED", "Từ chối"), ("SKIPPED", "Bỏ qua")]
 
     progress_id = models.AutoField(primary_key=True)
     document_type = models.CharField(max_length=50)    # PR | IPO
