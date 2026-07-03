@@ -22,7 +22,8 @@ export const authService = {
     if (profile && profile.data) {
       userStore.setUserProfileData(profile.data)
     }
-    
+
+    localStorage.setItem('user', JSON.stringify(profile.data))
     return response.data
   },
 
@@ -49,6 +50,7 @@ export const authService = {
     }
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user')
     const userStore = useUserStore()
     userStore.logoutUser()
   }

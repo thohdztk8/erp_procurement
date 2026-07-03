@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { menuAsideMain } from '@/menuAside.js'
+import { useUserStore } from '@/stores/user.js'
 
 const routes = [
   {
