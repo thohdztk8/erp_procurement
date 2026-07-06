@@ -2,6 +2,8 @@
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useMainStore } from '@/stores/main'
 import FormControlIcon from '@/components/FormControlIcon.vue'
+import { mdiEye, mdiEyeOff } from '@mdi/js'
+import BaseIcon from '@/components/BaseIcon.vue'
 
 const props = defineProps({
   name: String,
@@ -35,6 +37,11 @@ const computedValue = computed({
   },
 })
 
+const showPassword = ref(false)
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value
+}
+
 const inputElClass = computed(() => {
   const base = [
     'px-3 py-2 max-w-full focus:ring-3 focus:outline-hidden border-gray-700 rounded-sm w-full',
@@ -48,10 +55,18 @@ const inputElClass = computed(() => {
     base.push('pl-10')
   }
 
+  if (props.type === 'password') {
+    base.push('pr-10')
+  }
+
   return base
 })
 
-const computedType = computed(() => (props.options ? 'select' : props.type))
+const computedType = computed(() => {
+  if (props.options) return 'select'
+  if (props.type === 'password' && showPassword.value) return 'text'
+  return props.type
+})
 
 const controlIconH = computed(() => (props.type === 'textarea' ? 'h-full' : 'h-12'))
 
@@ -136,6 +151,14 @@ if (props.ctrlKFocus) {
       :type="computedType"
       :class="inputElClass"
     />
+    <button
+      v-if="type === 'password'"
+      type="button"
+      class="absolute right-0 top-0 h-12 w-12 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer z-10"
+      @click="togglePasswordVisibility"
+    >
+      <BaseIcon :path="showPassword ? mdiEyeOff : mdiEye" w="w-5" h="h-5" size="20" />
+    </button>
     <FormControlIcon v-if="icon" :icon="icon" :h="controlIconH" />
   </div>
 </template>
