@@ -38,7 +38,7 @@ const fetchPRs = async () => {
     prs.value = response.data.items || []
     totalPages.value = response.data.pagination?.total_pages || 1
     totalItems.value = response.data.pagination?.total_items || 0
-    
+
     // Tính toán số liệu thống kê bằng cách fetch danh sách lớn hơn hoặc ước lượng từ pagination
     const statsRes = await prService.getPRs({ page_size: 1000 })
     const allPrs = statsRes.data.items || []
@@ -146,7 +146,7 @@ const changePendingPage = (page) => {
 const showApproveForm = computed(() => {
   if (!prDetailData.value) return false
   const pr = prDetailData.value.pr
-  return pr.pr_status === 'PENDING' && 
+  return pr.pr_status === 'PENDING' &&
     (currentUser.value.permissions?.includes('PR_APPROVE') || currentUser.value.username === 'admin' || currentUser.value.role_code === 'ADMIN')
 })
 
@@ -156,100 +156,55 @@ const isApproverRole = computed(() => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiChartTimelineVariant" title="Quản lý Mua sắm (Procurement)" main>
-        <BaseButton
-          :icon="mdiPlus"
-          label="Tạo Yêu Cầu Mua Sắm (PR)"
-          color="contrast"
-          rounded-full
-          small
-          @click="showCreateModal = true; isEditMode = false; prDetailData = null"
-        />
-      </SectionTitleLineWithButton>
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiChartTimelineVariant" title="Quản lý Mua sắm (Procurement)" main>
+      <BaseButton :icon="mdiPlus" label="Tạo Yêu Cầu Mua Sắm (PR)" color="contrast" rounded-full small
+        @click="showCreateModal = true; isEditMode = false; prDetailData = null" />
+    </SectionTitleLineWithButton>
 
-      <!-- Khối thống kê số liệu -->
-      <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
-        <CardBoxWidget color="text-blue-500" :icon="mdiNotebook" :number="stats.total" label="Tổng số đơn PR" />
-        <CardBoxWidget color="text-yellow-500" :icon="mdiNotebook" :number="stats.pending" label="Chờ duyệt" />
-        <CardBoxWidget color="text-green-500" :icon="mdiNotebook" :number="stats.approved" label="Đã duyệt" />
-        <CardBoxWidget color="text-gray-500" :icon="mdiNotebook" :number="stats.draft" label="Đơn nháp (Draft)" />
+    <!-- Khối thống kê số liệu -->
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
+      <CardBoxWidget color="text-blue-500" :icon="mdiNotebook" :number="stats.total" label="Tổng số đơn PR" />
+      <CardBoxWidget color="text-yellow-500" :icon="mdiNotebook" :number="stats.pending" label="Chờ duyệt" />
+      <CardBoxWidget color="text-green-500" :icon="mdiNotebook" :number="stats.approved" label="Đã duyệt" />
+      <CardBoxWidget color="text-gray-500" :icon="mdiNotebook" :number="stats.draft" label="Đơn nháp (Draft)" />
+    </div>
+
+    <!-- Khối Tab danh sách -->
+    <div class="flex space-x-4 mb-4 border-b">
+      <button class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="activeTab = 'all'">
+        Tất cả yêu cầu
+      </button>
+      <button v-if="isApproverRole" class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="activeTab = 'pending'">
+        Chờ tôi duyệt ({{ pendingTotalItems }})
+      </button>
+    </div>
+
+    <!-- Bảng danh sách -->
+    <CardBox has-table class="mb-6">
+      <div v-if="activeTab === 'all'">
+        <PRTable :prs="prs" :show-approval-actions="isApproverRole" @view="handleView" @submit="handleSubmit"
+          @approve="handleView" @edit="handleEdit" @cancel="handleCancel" />
+        <BasePagination :current-page="currentPage" :total-pages="totalPages" :total-items="totalItems"
+          @change-page="changeAllPage" />
       </div>
-
-      <!-- Khối Tab danh sách -->
-      <div class="flex space-x-4 mb-4 border-b">
-        <button 
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'all'"
-        >
-          Tất cả yêu cầu
-        </button>
-        <button 
-          v-if="isApproverRole"
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'pending'"
-        >
-          Chờ tôi duyệt ({{ pendingTotalItems }})
-        </button>
+      <div v-else>
+        <PRTable :prs="pendingPrs" :show-approval-actions="true" @view="handleView" @submit="handleSubmit"
+          @approve="handleView" @edit="handleEdit" @cancel="handleCancel" />
+        <BasePagination :current-page="pendingPage" :total-pages="pendingTotalPages" :total-items="pendingTotalItems"
+          @change-page="changePendingPage" />
       </div>
+    </CardBox>
+  </SectionMain>
 
-      <!-- Bảng danh sách -->
-      <CardBox has-table class="mb-6">
-        <div v-if="activeTab === 'all'">
-          <PRTable 
-            :prs="prs" 
-            :show-approval-actions="isApproverRole"
-            @view="handleView" 
-            @submit="handleSubmit" 
-            @approve="handleView" 
-            @edit="handleEdit"
-            @cancel="handleCancel"
-          />
-          <BasePagination
-            :current-page="currentPage"
-            :total-pages="totalPages"
-            :total-items="totalItems"
-            @change-page="changeAllPage"
-          />
-        </div>
-        <div v-else>
-          <PRTable 
-            :prs="pendingPrs" 
-            :show-approval-actions="true"
-            @view="handleView" 
-            @submit="handleSubmit" 
-            @approve="handleView" 
-            @edit="handleEdit"
-            @cancel="handleCancel"
-          />
-          <BasePagination
-            :current-page="pendingPage"
-            :total-pages="pendingTotalPages"
-            :total-items="pendingTotalItems"
-            @change-page="changePendingPage"
-          />
-        </div>
-      </CardBox>
-    </SectionMain>
+  <!-- Modals -->
+  <PRCreateModal v-if="showCreateModal" :edit-mode="isEditMode" :pr-data="prDetailData"
+    @close="showCreateModal = false; isEditMode = false; prDetailData = null" @save="handleSavePR" />
 
-    <!-- Modals -->
-    <PRCreateModal 
-      v-if="showCreateModal" 
-      :edit-mode="isEditMode"
-      :pr-data="prDetailData"
-      @close="showCreateModal = false; isEditMode = false; prDetailData = null" 
-      @save="handleSavePR" 
-    />
-    
-    <PRDetailModal 
-      v-if="showDetailModal" 
-      :pr-data="prDetailData" 
-      :show-approve-form="showApproveForm"
-      @close="showDetailModal = false" 
-      @approve="handleApprove" 
-    />
-  </LayoutAuthenticated>
+  <PRDetailModal v-if="showDetailModal" :pr-data="prDetailData" :show-approve-form="showApproveForm"
+    @close="showDetailModal = false" @approve="handleApprove" />
 </template>

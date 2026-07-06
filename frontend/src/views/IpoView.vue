@@ -80,88 +80,61 @@ const formatCurrency = (val) => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiFileDocument" title="Hợp đồng mua sắm (IPO)" main />
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiFileDocument" title="Hợp đồng mua sắm (IPO)" main />
 
-      <!-- Tabs -->
-      <div class="flex space-x-4 mb-4 border-b">
-        <button 
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="changeTab('all')"
-        >
-          Tất cả hợp đồng ({{ activeTab === 'all' ? totalItems : ipos.length }})
-        </button>
-        <button 
-          v-if="isApproverRole"
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="changeTab('pending')"
-        >
-          Chờ phê duyệt ({{ activeTab === 'pending' ? totalItems : ipos.filter(i => i.ipo_status === 'PENDING').length }})
-        </button>
-      </div>
+    <!-- Tabs -->
+    <div class="flex space-x-4 mb-4 border-b">
+      <button class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'all' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="changeTab('all')">
+        Tất cả hợp đồng ({{ activeTab === 'all' ? totalItems : ipos.length }})
+      </button>
+      <button v-if="isApproverRole" class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'pending' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="changeTab('pending')">
+        Chờ phê duyệt ({{activeTab === 'pending' ? totalItems : ipos.filter(i => i.ipo_status === 'PENDING').length}})
+      </button>
+    </div>
 
-      <!-- Bảng danh sách hợp đồng IPO -->
-      <CardBox has-table>
-        <table class="w-full text-xs text-left">
-          <thead class="bg-gray-100 dark:bg-gray-800">
-            <tr>
-              <th class="px-6 py-3">Mã hợp đồng</th>
-              <th class="px-6 py-3">Giá trị hợp đồng</th>
-              <th class="px-6 py-3">Trạng thái</th>
-              <th class="px-6 py-3">Ngày lập</th>
-              <th class="px-6 py-3 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="i in ipos" :key="i.ipo_id" class="border-b">
-              <td class="px-6 py-3 font-semibold">{{ i.ipo_code }}</td>
-              <td class="px-6 py-3 font-bold text-green-600">{{ formatCurrency(i.total_amount) }}</td>
-              <td class="px-6 py-3 font-semibold text-blue-600">{{ i.ipo_status }}</td>
-              <td class="px-6 py-3">{{ new Date(i.created_at).toLocaleDateString('vi-VN') }}</td>
-              <td class="px-6 py-3 text-right">
-                <BaseButtons type="justify-end" no-wrap>
-                  <BaseButton color="info" :icon="mdiEye" label="Chi tiết" small @click="handleView(i.ipo_id, false)" />
-                  <BaseButton 
-                    v-if="i.ipo_status === 'DRAFT'" 
-                    color="success" 
-                    :icon="mdiSend" 
-                    label="Nộp duyệt" 
-                    small 
-                    @click="handleSubmit(i.ipo_id)" 
-                  />
-                  <BaseButton 
-                    v-if="i.ipo_status === 'PENDING' && isApproverRole" 
-                    color="warning" 
-                    label="Phê duyệt" 
-                    small 
-                    @click="handleView(i.ipo_id, true)" 
-                  />
-                </BaseButtons>
-              </td>
-            </tr>
-            <tr v-if="ipos.length === 0">
-              <td colspan="5" class="text-center py-8 text-gray-400">Không tìm thấy hợp đồng nào.</td>
-            </tr>
-          </tbody>
-        </table>
-        <BasePagination
-          :current-page="currentPage"
-          :total-pages="totalPages"
-          :total-items="totalItems"
-          @change-page="changePage"
-        />
-      </CardBox>
-    </SectionMain>
+    <!-- Bảng danh sách hợp đồng IPO -->
+    <CardBox has-table>
+      <table class="w-full text-xs text-left">
+        <thead class="bg-gray-100 dark:bg-gray-800">
+          <tr>
+            <th class="px-6 py-3">Mã hợp đồng</th>
+            <th class="px-6 py-3">Giá trị hợp đồng</th>
+            <th class="px-6 py-3">Trạng thái</th>
+            <th class="px-6 py-3">Ngày lập</th>
+            <th class="px-6 py-3 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="i in ipos" :key="i.ipo_id" class="border-b">
+            <td class="px-6 py-3 font-semibold">{{ i.ipo_code }}</td>
+            <td class="px-6 py-3 font-bold text-green-600">{{ formatCurrency(i.total_amount) }}</td>
+            <td class="px-6 py-3 font-semibold text-blue-600">{{ i.ipo_status }}</td>
+            <td class="px-6 py-3">{{ new Date(i.created_at).toLocaleDateString('vi-VN') }}</td>
+            <td class="px-6 py-3 text-right">
+              <BaseButtons type="justify-end" no-wrap>
+                <BaseButton color="info" :icon="mdiEye" label="Chi tiết" small @click="handleView(i.ipo_id, false)" />
+                <BaseButton v-if="i.ipo_status === 'DRAFT'" color="success" :icon="mdiSend" label="Nộp duyệt" small
+                  @click="handleSubmit(i.ipo_id)" />
+                <BaseButton v-if="i.ipo_status === 'PENDING' && isApproverRole" color="warning" label="Phê duyệt" small
+                  @click="handleView(i.ipo_id, true)" />
+              </BaseButtons>
+            </td>
+          </tr>
+          <tr v-if="ipos.length === 0">
+            <td colspan="5" class="text-center py-8 text-gray-400">Không tìm thấy hợp đồng nào.</td>
+          </tr>
+        </tbody>
+      </table>
+      <BasePagination :current-page="currentPage" :total-pages="totalPages" :total-items="totalItems"
+        @change-page="changePage" />
+    </CardBox>
+  </SectionMain>
 
-    <IPODetailModal 
-      v-if="showDetailModal" 
-      :ipo-id="selectedIpoId" 
-      :show-approve-form="showApproveForm"
-      @close="showDetailModal = false" 
-      @updated="fetchIPOs" 
-    />
-  </LayoutAuthenticated>
+  <IPODetailModal v-if="showDetailModal" :ipo-id="selectedIpoId" :show-approve-form="showApproveForm"
+    @close="showDetailModal = false" @updated="fetchIPOs" />
 </template>

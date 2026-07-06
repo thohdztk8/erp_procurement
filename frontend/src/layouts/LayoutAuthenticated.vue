@@ -1,6 +1,6 @@
 <script setup>
 import { mdiForwardburger, mdiBackburger, mdiMenu } from '@mdi/js'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { menuAsideMain, menuAsideBottom } from '@/menuAside.js'
 import menuNavBar from '@/menuNavBar.js'
@@ -11,19 +11,24 @@ import NavBar from '@/components/NavBar.vue'
 import NavBarItemPlain from '@/components/NavBarItemPlain.vue'
 import AsideMenu from '@/components/AsideMenu.vue'
 import FooterBar from '@/components/FooterBar.vue'
-
 import { authService } from '@/services/api.js'
-import { useMainStore } from '@/stores/main.js'
+import { useUserStore } from '@/stores/user.js'
+import { storeToRefs } from 'pinia'
 
 const layoutAsidePadding = 'xl:pl-60'
 
 const darkModeStore = useDarkModeStore()
-const mainStore = useMainStore()
+const userStore = useUserStore()
+const { userProfileData } = storeToRefs(userStore)
 
 const router = useRouter()
 
 const isAsideMobileExpanded = ref(false)
 const isAsideLgActive = ref(false)
+
+onMounted(async () => {
+    await userStore.fetchUserProfile()
+})
 
 router.beforeEach(() => {
   isAsideMobileExpanded.value = false
@@ -31,16 +36,14 @@ router.beforeEach(() => {
 })
 
 const filteredMenuAsideMain = computed(() => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
-  const username = user.username || ''
   return menuAsideMain.filter((item) => {
     if (!item.permissions || item.permissions.length === 0) {
       return true
     }
-    if (username === 'admin' || mainStore.userRole === 'ADMIN') {
+    if (userProfileData.value.username === 'admin' || userProfileData.value.role === 'ADMIN') {
       return true
     }
-    const userPermissions = mainStore.userPermissions || []
+    const userPermissions = userProfileData.value.permissions || []
     return item.permissions.some((p) => userPermissions.includes(p))
   })
 })
@@ -97,7 +100,7 @@ const menuClick = async (event, item) => {
         @menu-click="menuClick"
         @aside-lg-close-click="isAsideLgActive = false"
       />
-      <slot />
+      <RouterView />
       <FooterBar />
     </div>
   </div>

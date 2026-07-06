@@ -5,55 +5,33 @@ import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionTitle first>Mobile & Tablet</SectionTitle>
+  <SectionTitle first>Mobile & Tablet</SectionTitle>
 
-    <SectionMain>
-      <div
-        class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12"
-      >
-        <img
-          src="https://static.justboil.me/templates/one/one-tailwind-vue-mobile.png"
-          class="block"
-        />
-      </div>
-    </SectionMain>
+  <SectionMain>
+    <div class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12">
+      <img src="https://static.justboil.me/templates/one/one-tailwind-vue-mobile.png" class="block" />
+    </div>
+  </SectionMain>
 
-    <SectionTitle>Small laptop 1024px</SectionTitle>
+  <SectionTitle>Small laptop 1024px</SectionTitle>
 
-    <SectionMain>
-      <div
-        class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12"
-      >
-        <img
-          src="https://static.justboil.me/templates/one/one-tailwind-vue-1024.png"
-          class="block"
-        />
-      </div>
-    </SectionMain>
+  <SectionMain>
+    <div class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12">
+      <img src="https://static.justboil.me/templates/one/one-tailwind-vue-1024.png" class="block" />
+    </div>
+  </SectionMain>
 
-    <SectionMain>
-      <div
-        class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12"
-      >
-        <img
-          src="https://static.justboil.me/templates/one/one-tailwind-vue-1024-menu-open.png"
-          class="block"
-        />
-      </div>
-    </SectionMain>
+  <SectionMain>
+    <div class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12">
+      <img src="https://static.justboil.me/templates/one/one-tailwind-vue-1024-menu-open.png" class="block" />
+    </div>
+  </SectionMain>
 
-    <SectionTitle>Laptop & desktop</SectionTitle>
+  <SectionTitle>Laptop & desktop</SectionTitle>
 
-    <SectionMain>
-      <div
-        class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12"
-      >
-        <img
-          src="https://static.justboil.me/templates/one/one-tailwind-vue-widescreen.png"
-          class="block"
-        />
-      </div>
-    </SectionMain>
-  </LayoutAuthenticated>
+  <SectionMain>
+    <div class="overflow-hidden rounded-3xl border-8 border-white shadow-2xl md:mx-auto md:w-10/12">
+      <img src="https://static.justboil.me/templates/one/one-tailwind-vue-widescreen.png" class="block" />
+    </div>
+  </SectionMain>
 </template>

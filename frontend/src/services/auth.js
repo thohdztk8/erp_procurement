@@ -1,5 +1,5 @@
 import api from './client'
-
+import { useUserStore } from '@/stores/user'
 /**
  * Authentication service handling login, logout and profile fetching.
  */
@@ -17,6 +17,12 @@ export const authService = {
     localStorage.setItem('refresh_token', refresh_token)
     
     const profile = await this.getProfile()
+    const userStore = useUserStore()
+
+    if (profile && profile.data) {
+      userStore.setUserProfileData(profile.data)
+    }
+
     localStorage.setItem('user', JSON.stringify(profile.data))
     return response.data
   },
@@ -63,5 +69,7 @@ export const authService = {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
+    const userStore = useUserStore()
+    userStore.logoutUser()
   }
 }

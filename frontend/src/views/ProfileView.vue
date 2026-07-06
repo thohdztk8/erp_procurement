@@ -1,7 +1,6 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
-import { useMainStore } from '@/stores/main'
-import { mdiAccount, mdiMail, mdiAsterisk, mdiFormTextboxPassword, mdiPhone } from '@mdi/js'
+import { useUserStore } from '@/stores/user'
+import { mdiAccount, mdiMail, mdiAsterisk, mdiFormTextboxPassword } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseDivider from '@/components/BaseDivider.vue'
@@ -12,215 +11,78 @@ import BaseButtons from '@/components/BaseButtons.vue'
 import UserCard from '@/components/UserCard.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
-import { authService } from '@/services/api.js'
+import { storeToRefs } from 'pinia'
 
-const mainStore = useMainStore()
+const userStore = useUserStore()
 
-const profileForm = reactive({
-  full_name: mainStore.userName,
-  email: mainStore.userEmail,
-  phone: mainStore.userPhone,
-})
+const {
+  editUserProfileData,
+  editPasswordData
+} = storeToRefs(userStore)
 
-const passwordForm = reactive({
-  password_current: '',
-  password: '',
-  password_confirmation: '',
-})
+const {
+  hanldeEditUserProfile,
+  handleEditPassword
+} = userStore
 
-const isSubmittingProfile = ref(false)
-const isSubmittingPass = ref(false)
-
-onMounted(async () => {
-  try {
-    const response = await authService.getProfile()
-    if (response && response.data) {
-      mainStore.setUser(response.data)
-      profileForm.full_name = response.data.full_name || ''
-      profileForm.email = response.data.email || ''
-      profileForm.phone = response.data.phone || ''
-    }
-  } catch (error) {
-    console.error('Không thể tải thông tin profile từ DB:', error)
-  }
-})
-
-const submitProfile = async () => {
-  if (isSubmittingProfile.value) return
-
-  const name = (profileForm.full_name || '').trim()
-  if (name.length < 2) {
-    alert('Họ và tên phải có độ dài tối thiểu 2 ký tự.')
-    return
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailPattern.test(profileForm.email)) {
-    alert('Địa chỉ e-mail không hợp lệ.')
-    return
-  }
-
-  if (profileForm.phone) {
-    const phonePattern = /^(0|\+84)(3|5|7|8|9|1[2689])([0-9]{8})$/
-    if (!phonePattern.test(profileForm.phone.trim())) {
-      alert('Số điện thoại không đúng định dạng Việt Nam.')
-      return
-    }
-  }
-
-  isSubmittingProfile.value = true
-  try {
-    const response = await authService.updateProfile({
-      full_name: profileForm.full_name,
-      email: profileForm.email,
-      phone: profileForm.phone,
-    })
-    mainStore.setUser(response.data)
-    alert(response.message || 'Cập nhật thông tin cá nhân thành công!')
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isSubmittingProfile.value = false
-  }
-}
-
-const submitPass = async () => {
-  if (isSubmittingPass.value) return
-
-  if (passwordForm.password !== passwordForm.password_confirmation) {
-    alert('Xác nhận mật khẩu mới không khớp.')
-    return
-  }
-
-  if (passwordForm.password.length < 8) {
-    alert('Mật khẩu mới phải dài tối thiểu 8 ký tự.')
-    return
-  }
-
-  if (!/[A-Z]/.test(passwordForm.password)) {
-    alert('Mật khẩu mới phải chứa ít nhất một chữ viết hoa.')
-    return
-  }
-
-  if (!/[a-z]/.test(passwordForm.password)) {
-    alert('Mật khẩu mới phải chứa ít nhất một chữ viết thường.')
-    return
-  }
-
-  if (!/[0-9]/.test(passwordForm.password)) {
-    alert('Mật khẩu mới phải chứa ít nhất một số.')
-    return
-  }
-
-  isSubmittingPass.value = true
-  try {
-    const response = await authService.changePassword({
-      password_current: passwordForm.password_current,
-      password: passwordForm.password,
-      password_confirmation: passwordForm.password_confirmation,
-    })
-    alert(response.message || 'Thay đổi mật khẩu thành công!')
-    passwordForm.password_current = ''
-    passwordForm.password = ''
-    passwordForm.password_confirmation = ''
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isSubmittingPass.value = false
-  }
-}
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiAccount" title="Profile" main>
-      </SectionTitleLineWithButton>
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiAccount" title="Profile" main>
+    </SectionTitleLineWithButton>
 
-      <UserCard class="mb-6" />
+    <UserCard class="mb-6" />
 
-      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <CardBox is-form @submit.prevent="submitProfile">
-          <FormField label="Họ và tên" help="Bắt buộc. Tên đầy đủ của bạn">
-            <FormControl
-              v-model="profileForm.full_name"
-              :icon="mdiAccount"
-              name="fullname"
-              required
-              autocomplete="name"
-            />
-          </FormField>
-          <FormField label="E-mail" help="Bắt buộc. Địa chỉ e-mail">
-            <FormControl
-              v-model="profileForm.email"
-              :icon="mdiMail"
-              type="email"
-              name="email"
-              required
-              autocomplete="email"
-            />
-          </FormField>
-          <FormField label="Số điện thoại" help="Số điện thoại liên lạc">
-            <FormControl
-              v-model="profileForm.phone"
-              :icon="mdiPhone"
-              type="tel"
-              name="phone"
-              autocomplete="tel"
-            />
-          </FormField>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <CardBox is-form @submit.prevent="hanldeEditUserProfile()">
+        <FormField label="Avatar" help="Max 500kb">
+          <FormFilePicker label="Upload" />
+        </FormField>
 
-          <template #footer>
-            <BaseButtons>
-              <BaseButton color="info" type="submit" label="Lưu thông tin" :disabled="isSubmittingProfile" />
-            </BaseButtons>
-          </template>
-        </CardBox>
+        <FormField label="Full name" help="Required. Your name">
+          <FormControl v-model="editUserProfileData.full_name" :icon="mdiAccount" name="full_name" required
+            autocomplete="full_name" />
+        </FormField>
+        <FormField label="E-mail" help="Required. Your e-mail">
+          <FormControl v-model="editUserProfileData.email" :icon="mdiMail" type="email" name="email" required
+            autocomplete="email" />
+        </FormField>
+        <FormField label="Phone" help="Required. Your phone number">
+          <FormControl v-model="editUserProfileData.phone" :icon="mdiPhone" type="tel" name="phone" required
+            autocomplete="tel" />
+        </FormField>
 
-        <CardBox is-form @submit.prevent="submitPass">
-          <FormField label="Mật khẩu hiện tại" help="Bắt buộc. Mật khẩu hiện tại của bạn">
-            <FormControl
-              v-model="passwordForm.password_current"
-              :icon="mdiAsterisk"
-              name="password_current"
-              type="password"
-              required
-              autocomplete="current-password"
-            />
-          </FormField>
+        <template #footer>
+          <BaseButtons>
+            <BaseButton color="info" type="submit" label="Lưu thông tin" :disabled="isSubmittingProfile" />
+          </BaseButtons>
+        </template>
+      </CardBox>
 
-          <BaseDivider />
+      <CardBox is-form @submit.prevent="handleEditPassword()">
+        <FormField label="Current password" help="Required. Your current password">
+          <FormControl v-model="editPasswordData.currentPassword" :icon="mdiAsterisk" name="password_current"
+            type="password" required autocomplete="current-password" />
+        </FormField>
 
-          <FormField label="Mật khẩu mới" help="Bắt buộc. Mật khẩu mới">
-            <FormControl
-              v-model="passwordForm.password"
-              :icon="mdiFormTextboxPassword"
-              name="password"
-              type="password"
-              required
-              autocomplete="new-password"
-            />
-          </FormField>
+        <BaseDivider />
 
-          <FormField label="Xác nhận mật khẩu mới" help="Bắt buộc. Nhập lại mật khẩu mới">
-            <FormControl
-              v-model="passwordForm.password_confirmation"
-              :icon="mdiFormTextboxPassword"
-              name="password_confirmation"
-              type="password"
-              required
-              autocomplete="new-password"
-            />
-          </FormField>
+        <FormField label="New password" help="Required. New password">
+          <FormControl v-model="editPasswordData.newPassword" :icon="mdiFormTextboxPassword" name="password"
+            type="password" required autocomplete="new-password" />
+        </FormField>
 
-          <template #footer>
-            <BaseButtons>
-              <BaseButton type="submit" color="info" label="Đổi mật khẩu" :disabled="isSubmittingPass" />
-            </BaseButtons>
-          </template>
-        </CardBox>
-      </div>
-    </SectionMain>
-  </LayoutAuthenticated>
+        <FormField label="Confirm password" help="Required. New password one more time">
+          <FormControl v-model="editPasswordData.confirmPassword" :icon="mdiFormTextboxPassword"
+            name="password_confirmation" type="password" required autocomplete="new-password" />
+        </FormField>
+
+        <BaseButtons>
+          <BaseButton type="submit" color="info" label="Submit" />
+          <BaseButton color="info" label="Options" outline />
+        </BaseButtons>
+      </CardBox>
+    </div>
+  </SectionMain>
 </template>
-

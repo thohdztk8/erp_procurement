@@ -41,8 +41,8 @@ fi
 if [ $# -eq 0 ]; then
     # Nếu không truyền tham số, mặc định chạy up --build
     echo -e "${GREEN}==> Thực hiện: $DOCKER_CMD -f $DOCKER_COMPOSE_FILE up --build${NC}"
-    exec $DOCKER_CMD -f "$DOCKER_COMPOSE_FILE" up --build
+    exec $DOCKER_CMD -f "$DOCKER_COMPOSE_FILE" up --build -d
 else
     echo -e "${GREEN}==> Thực hiện: $DOCKER_CMD -f $DOCKER_COMPOSE_FILE $@${NC}"
-    exec $DOCKER_CMD -f "$DOCKER_COMPOSE_FILE" "$@"
+    exec $DOCKER_CMD -f "$DOCKER_COMPOSE_FILE" "$@" -d
 fi
