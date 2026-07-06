@@ -38,7 +38,7 @@ class InvoiceCreateView(APIView):
 
 class InvoiceListView(APIView):
     """GET /api/v2/invoice/"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("INV_CREATE")]
 
     def get(self, request):
         qs = Invoice.objects.select_related("supplier").order_by("-created_at")
@@ -58,7 +58,7 @@ class InvoiceListView(APIView):
 
 class InvoiceDetailView(APIView):
     """GET /api/v2/invoice/<id>"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("INV_CREATE")]
 
     def get(self, request, pk):
         try:
@@ -167,7 +167,7 @@ class PaymentApproveView(APIView):
 
 class PaymentListView(APIView):
     """GET /api/v2/payment/"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("PAYMENT_CREATE")]
 
     def get(self, request):
         qs = PaymentRequest.objects.select_related("invoice__supplier", "applicant").order_by("-created_at")
@@ -182,7 +182,7 @@ class PaymentListView(APIView):
 
 class SupplierEvaluationCreateView(APIView):
     """POST /api/v2/invoice/supplier-evaluation/create"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("INV_CREATE")]
 
     def post(self, request):
         serializer = SupplierEvaluationCreateSerializer(data=request.data)
@@ -205,7 +205,7 @@ class SupplierEvaluationCreateView(APIView):
 
 class AccountingExportView(APIView):
     """POST /api/v2/invoice/accounting/exports"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("INV_CREATE")]
 
     def post(self, request):
         # Giả lập xuất báo cáo
@@ -218,7 +218,7 @@ class AccountingExportView(APIView):
 
 class ExportTemplatesView(APIView):
     """GET /api/v2/invoice/accounting/export-templates"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("INV_CREATE")]
 
     def get(self, request):
         return Response({

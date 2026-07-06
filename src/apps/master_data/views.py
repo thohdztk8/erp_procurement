@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from core.pagination.standard import StandardResultsPagination
-from core.permissions.rbac import HasPermissionCode
+from core.permissions.rbac import HasPermissionCode, require_permission
 
 from .models import ApprovalWorkflow, Material, Supplier, SystemConfig
 from .serializers import (
@@ -60,7 +60,7 @@ class MaterialListView(APIView):
 
 class MaterialDetailView(APIView):
     """GET /api/v2/master/materials/<id>"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("CONFIG_VIEW")]
 
     def get(self, request, pk):
         try:
@@ -112,7 +112,7 @@ class SupplierListView(APIView):
 
 class SupplierDetailView(APIView):
     """GET /api/v2/master/suppliers/<id>"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("CONFIG_VIEW")]
 
     def get(self, request, pk):
         try:
@@ -124,7 +124,7 @@ class SupplierDetailView(APIView):
 
 class ApprovalWorkflowListView(APIView):
     """GET /api/v2/master/approval-workflows"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("CONFIG_VIEW")]
 
     def get(self, request):
         qs = ApprovalWorkflow.objects.filter(is_active=True).prefetch_related("steps__role")
@@ -133,7 +133,7 @@ class ApprovalWorkflowListView(APIView):
 
 class SystemConfigView(APIView):
     """GET /api/v2/master/configs"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("CONFIG_VIEW")]
 
     def get(self, request):
         qs = SystemConfig.objects.all()
@@ -142,7 +142,7 @@ class SystemConfigView(APIView):
 
 class SupplierContractPriceCreateView(APIView):
     """POST /api/v2/master/suppliers/<id>/contract-prices"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("SUPPLIER_EDIT")]
 
     def post(self, request, pk):
         try:
