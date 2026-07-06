@@ -54,6 +54,11 @@ class IPODetailView(APIView):
             ).get(ipo_id=pk)
         except IPO.DoesNotExist:
             return Response({"detail": "Không tìm thấy IPO."}, status=404)
+        
+        # Row-level check: Chỉ người có quyền IPO_VIEW_ALL hoặc buyer của IPO mới được truy cập
+        if not request.user.has_permission("IPO_VIEW_ALL") and ipo.buyer != request.user:
+            return Response({"detail": "Bạn không có quyền truy cập đơn IPO này."}, status=status.HTTP_403_FORBIDDEN)
+            
         return Response({"data": IPODetailSerializer(ipo).data})
 
 
@@ -63,6 +68,10 @@ class IPOListView(APIView):
 
     def get(self, request):
         qs = IPO.objects.filter(is_latest=True).select_related("supplier", "buyer")
+
+        # Row-level check: Chỉ người có quyền IPO_VIEW_ALL mới xem toàn bộ, còn lại chỉ xem IPO mình tạo
+        if not request.user.has_permission("IPO_VIEW_ALL"):
+            qs = qs.filter(buyer=request.user)
 
         ipo_status = request.query_params.get("status")
         if ipo_status:

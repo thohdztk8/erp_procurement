@@ -92,6 +92,10 @@ class PRDetailView(APIView):
             ).prefetch_related("items__material").get(pr_id=pk)
         except PurchaseRequisition.DoesNotExist:
             return Response({"detail": "Không tìm thấy đơn PR."}, status=404)
+        
+        # Kiểm tra bảo mật bản ghi (Row-level / Dept-level security)
+        if not request.user.has_permission("PR_VIEW_ALL") and pr.dept != request.user.dept:
+            return Response({"detail": "Bạn không có quyền truy cập đơn PR này."}, status=status.HTTP_403_FORBIDDEN)
 
         approval_steps = DocumentApprovalProgress.objects.filter(
             document_type="PR", document_id=pk

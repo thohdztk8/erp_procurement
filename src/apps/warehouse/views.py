@@ -52,7 +52,7 @@ class ReceiptCreateView(APIView):
 
 class ReceiptDetailView(APIView):
     """GET /api/v2/warehouse/receipt/<id>"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("WH_RECEIPT_CREATE")]
 
     def get(self, request, pk):
         try:
@@ -66,7 +66,7 @@ class ReceiptDetailView(APIView):
 
 class InventoryListView(APIView):
     """GET /api/v2/warehouse/inventory"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("WH_INVENTORY_VIEW")]
 
     def get(self, request):
         qs = Inventory.objects.select_related("material", "branch")
@@ -89,7 +89,7 @@ class InventoryListView(APIView):
 
 class WarehouseReturnListView(APIView):
     """GET /api/v2/warehouse/returns"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("WH_RETURN_CREATE")]
 
     def get(self, request):
         qs = WarehouseReturn.objects.select_related("supplier").order_by("-created_at")
@@ -137,7 +137,7 @@ class IssueCreateView(APIView):
 
 class IssueListView(APIView):
     """GET /api/v2/warehouse/issues"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("WH_ISSUE_CREATE")]
 
     def get(self, request):
         qs = StockIssue.objects.select_related("warehouse_keeper", "receiver").prefetch_related("items").order_by("-issued_at")
@@ -147,7 +147,7 @@ class IssueListView(APIView):
 
 class IssueConfirmView(APIView):
     """POST /api/v2/warehouse/issues/<id>/confirm-receipt"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, require_permission("WH_ISSUE_CREATE")]
 
     def post(self, request, pk):
         try:
