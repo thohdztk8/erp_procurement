@@ -1,74 +1,80 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { menuAsideMain } from '@/menuAside.js'
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard',
-  },
-  {
-    meta: {
-      title: 'Dashboard / PR',
-    },
-    path: '/dashboard',
-    name: 'dashboard',
-    component: () => import('@/views/HomeView.vue'),
-  },
-  {
-    meta: {
-      title: 'Dữ liệu gốc (Master Data)',
-    },
-    path: '/master-data',
-    name: 'master-data',
-    component: () => import('@/views/MasterDataView.vue'),
-  },
-  {
-    meta: {
-      title: 'Giỏ hàng & Đơn mua hàng (PO)',
-    },
-    path: '/cart-orders',
-    name: 'cart-orders',
-    component: () => import('@/views/CartOrderView.vue'),
-  },
-  {
-    meta: {
-      title: 'Đấu thầu & Báo giá',
-    },
-    path: '/quotations',
-    name: 'quotations',
-    component: () => import('@/views/QuotationView.vue'),
-  },
-  {
-    meta: {
-      title: 'Hợp đồng mua sắm (IPO)',
-    },
-    path: '/contracts',
-    name: 'contracts',
-    component: () => import('@/views/IpoView.vue'),
-  },
-  {
-    meta: {
-      title: 'Kho & Nhập kho (GRN)',
-    },
-    path: '/warehouse',
-    name: 'warehouse',
-    component: () => import('@/views/WarehouseView.vue'),
-  },
-  {
-    meta: {
-      title: 'Kế toán & Thanh toán',
-    },
-    path: '/finance',
-    name: 'finance',
-    component: () => import('@/views/FinanceView.vue'),
-  },
-  {
-    meta: {
-      title: 'Thông tin cá nhân',
-    },
-    path: '/profile',
-    name: 'profile',
-    component: () => import('@/views/ProfileView.vue'),
+    component: () => import('@/layouts/LayoutAuthenticated.vue'),
+    children: [
+      {
+        path: '',
+        redirect: 'dashboard',
+      },
+      {
+        meta: {
+          title: 'Dashboard / PR',
+        },
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/HomeView.vue'),
+      },
+      {
+        meta: {
+          title: 'Dữ liệu gốc (Master Data)',
+        },
+        path: 'master-data',
+        name: 'master-data',
+        component: () => import('@/views/MasterDataView.vue'),
+      },
+      {
+        meta: {
+          title: 'Giỏ hàng & Đơn mua hàng (PO)',
+        },
+        path: 'cart-orders',
+        name: 'cart-orders',
+        component: () => import('@/views/CartOrderView.vue'),
+      },
+      {
+        meta: {
+          title: 'Đấu thầu & Báo giá',
+        },
+        path: 'quotations',
+        name: 'quotations',
+        component: () => import('@/views/QuotationView.vue'),
+      },
+      {
+        meta: {
+          title: 'Hợp đồng mua sắm (IPO)',
+        },
+        path: 'contracts',
+        name: 'contracts',
+        component: () => import('@/views/IpoView.vue'),
+      },
+      {
+        meta: {
+          title: 'Kho & Nhập kho (GRN)',
+        },
+        path: 'warehouse',
+        name: 'warehouse',
+        component: () => import('@/views/WarehouseView.vue'),
+      },
+      {
+        meta: {
+          title: 'Kế toán & Thanh toán',
+        },
+        path: 'finance',
+        name: 'finance',
+        component: () => import('@/views/FinanceView.vue'),
+      },
+      {
+        meta: {
+          title: 'Thông tin cá nhân',
+        },
+        path: 'profile',
+        name: 'profile',
+        component: () => import('@/views/ProfileView.vue'),
+      },
+    ]
   },
   {
     meta: {
@@ -97,7 +103,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 }
@@ -107,11 +113,11 @@ const router = createRouter({
 export const getFirstAllowedRoute = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   if (!user.username) return '/login'
-  
+
   if (user.username === 'admin' || user.role_code === 'ADMIN') {
     return '/dashboard'
   }
-  
+
   const userPermissions = user.permissions || []
   for (const item of menuAsideMain) {
     if (!item.permissions || item.permissions.length === 0) {
@@ -134,10 +140,10 @@ router.beforeEach((to, from, next) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}')
     const username = user.username || ''
     const role_code = user.role_code || ''
-    
+
     // Tìm item tương ứng trong menuAsideMain để kiểm tra quyền
     const matchedMenuItem = menuAsideMain.find(item => item.to === to.path)
-    
+
     if (matchedMenuItem && matchedMenuItem.permissions && matchedMenuItem.permissions.length > 0) {
       if (username !== 'admin' && role_code !== 'ADMIN') {
         const userPermissions = user.permissions || []

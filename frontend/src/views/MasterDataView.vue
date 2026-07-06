@@ -51,7 +51,7 @@ const fetchData = async () => {
     materials.value = matRes.data.items || []
     materialTotalPages.value = matRes.data.pagination?.total_pages || 1
     materialTotalItems.value = matRes.data.pagination?.total_items || 0
-    
+
     const supRes = await masterService.getSuppliers({ page: supplierPage.value })
     suppliers.value = supRes.data.items || []
     supplierTotalPages.value = supRes.data.pagination?.total_pages || 1
@@ -135,165 +135,134 @@ const changeUserPage = (page) => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiDatabase" title="Dữ liệu gốc (Master Data)" main>
-        <BaseButton
-          v-if="activeTab === 'materials'"
-          :icon="mdiPlus"
-          label="Thêm vật tư"
-          color="contrast"
-          small
-          @click="showMaterialModal = true"
-        />
-        <BaseButton
-          v-if="activeTab === 'suppliers'"
-          :icon="mdiPlus"
-          label="Thêm nhà cung cấp"
-          color="contrast"
-          small
-          @click="showSupplierModal = true"
-        />
-        <BaseButton
-          v-slot:default
-          v-if="activeTab === 'users' && isAdmin"
-          :icon="mdiPlus"
-          label="Thêm tài khoản"
-          color="contrast"
-          small
-          @click="selectedUser = null; showUserModal = true"
-        />
-      </SectionTitleLineWithButton>
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiDatabase" title="Dữ liệu gốc (Master Data)" main>
+      <BaseButton v-if="activeTab === 'materials'" :icon="mdiPlus" label="Thêm vật tư" color="contrast" small
+        @click="showMaterialModal = true" />
+      <BaseButton v-if="activeTab === 'suppliers'" :icon="mdiPlus" label="Thêm nhà cung cấp" color="contrast" small
+        @click="showSupplierModal = true" />
+      <BaseButton v-slot:default v-if="activeTab === 'users' && isAdmin" :icon="mdiPlus" label="Thêm tài khoản"
+        color="contrast" small @click="selectedUser = null; showUserModal = true" />
+    </SectionTitleLineWithButton>
 
-      <!-- Tabs chọn phân hệ dữ liệu -->
-      <div class="flex space-x-4 mb-4 border-b">
-        <button 
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'materials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'materials'"
-        >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiBallotOutline" /> Danh mục vật tư ({{ materialTotalItems }})</span>
-        </button>
-        <button 
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'suppliers' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'suppliers'"
-        >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountMultiple" /> Nhà cung cấp ({{ supplierTotalItems }})</span>
-        </button>
-        <button 
-          v-if="isAdmin"
-          class="pb-2 px-4 text-sm font-semibold transition"
-          :class="activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
-          @click="activeTab = 'users'"
-        >
-          <span class="flex items-center gap-1"><BaseIcon :path="mdiAccountLock" /> Quản lý tài khoản & Quyền ({{ userTotalItems }})</span>
-        </button>
-      </div>
+    <!-- Tabs chọn phân hệ dữ liệu -->
+    <div class="flex space-x-4 mb-4 border-b">
+      <button class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'materials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="activeTab = 'materials'">
+        <span class="flex items-center gap-1">
+          <BaseIcon :path="mdiBallotOutline" /> Danh mục vật tư ({{ materialTotalItems }})
+        </span>
+      </button>
+      <button class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'suppliers' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="activeTab = 'suppliers'">
+        <span class="flex items-center gap-1">
+          <BaseIcon :path="mdiAccountMultiple" /> Nhà cung cấp ({{ supplierTotalItems }})
+        </span>
+      </button>
+      <button v-if="isAdmin" class="pb-2 px-4 text-sm font-semibold transition"
+        :class="activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'"
+        @click="activeTab = 'users'">
+        <span class="flex items-center gap-1">
+          <BaseIcon :path="mdiAccountLock" /> Quản lý tài khoản & Quyền ({{ userTotalItems }})
+        </span>
+      </button>
+    </div>
 
-      <!-- Bảng Vật Tư -->
-      <CardBox v-if="activeTab === 'materials'" has-table class="mb-6">
-        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-          <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th class="px-6 py-3">Mã vật tư</th>
-              <th class="px-6 py-3">Tên vật tư</th>
-              <th class="px-6 py-3">Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="mat in materials" :key="mat.material_id" class="border-b bg-white dark:bg-gray-800">
-              <td class="px-6 py-4 font-bold">{{ mat.material_code }}</td>
-              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ mat.material_name }}</td>
-              <td class="px-6 py-4">
-                <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">Hoạt động</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <BasePagination
-          :current-page="materialPage"
-          :total-pages="materialTotalPages"
-          :total-items="materialTotalItems"
-          @change-page="changeMaterialPage"
-        />
-      </CardBox>
+    <!-- Bảng Vật Tư -->
+    <CardBox v-if="activeTab === 'materials'" has-table class="mb-6">
+      <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th class="px-6 py-3">Mã vật tư</th>
+            <th class="px-6 py-3">Tên vật tư</th>
+            <th class="px-6 py-3">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="mat in materials" :key="mat.material_id" class="border-b bg-white dark:bg-gray-800">
+            <td class="px-6 py-4 font-bold">{{ mat.material_code }}</td>
+            <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ mat.material_name }}</td>
+            <td class="px-6 py-4">
+              <span class="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">Hoạt động</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <BasePagination :current-page="materialPage" :total-pages="materialTotalPages" :total-items="materialTotalItems"
+        @change-page="changeMaterialPage" />
+    </CardBox>
 
-      <!-- Bảng Nhà Cung Cấp -->
-      <CardBox v-else-if="activeTab === 'suppliers'" has-table class="mb-6">
-        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-          <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th class="px-6 py-3">Mã</th>
-              <th class="px-6 py-3">Tên nhà cung cấp</th>
-              <th class="px-6 py-3">Mã số thuế</th>
-              <th class="px-6 py-3">Số điện thoại</th>
-              <th class="px-6 py-3 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="sup in suppliers" :key="sup.supplier_id" class="border-b bg-white dark:bg-gray-800">
-              <td class="px-6 py-4 font-bold">{{ sup.supplier_code }}</td>
-              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ sup.supplier_name }}</td>
-              <td class="px-6 py-4">{{ sup.tax_code }}</td>
-              <td class="px-6 py-4">{{ sup.contact_phone || '-' }}</td>
-              <td class="px-6 py-4 text-right">
-                <BaseButton color="info" :icon="mdiCashMarker" label="Giá khung" small @click="selectedSupplier = sup; showPriceModal = true" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <BasePagination
-          :current-page="supplierPage"
-          :total-pages="supplierTotalPages"
-          :total-items="supplierTotalItems"
-          @change-page="changeSupplierPage"
-        />
-      </CardBox>
+    <!-- Bảng Nhà Cung Cấp -->
+    <CardBox v-else-if="activeTab === 'suppliers'" has-table class="mb-6">
+      <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th class="px-6 py-3">Mã</th>
+            <th class="px-6 py-3">Tên nhà cung cấp</th>
+            <th class="px-6 py-3">Mã số thuế</th>
+            <th class="px-6 py-3">Số điện thoại</th>
+            <th class="px-6 py-3 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="sup in suppliers" :key="sup.supplier_id" class="border-b bg-white dark:bg-gray-800">
+            <td class="px-6 py-4 font-bold">{{ sup.supplier_code }}</td>
+            <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ sup.supplier_name }}</td>
+            <td class="px-6 py-4">{{ sup.tax_code }}</td>
+            <td class="px-6 py-4">{{ sup.contact_phone || '-' }}</td>
+            <td class="px-6 py-4 text-right">
+              <BaseButton color="info" :icon="mdiCashMarker" label="Giá khung" small
+                @click="selectedSupplier = sup; showPriceModal = true" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <BasePagination :current-page="supplierPage" :total-pages="supplierTotalPages" :total-items="supplierTotalItems"
+        @change-page="changeSupplierPage" />
+    </CardBox>
 
-      <!-- Bảng Tài Khoản Người Dùng -->
-      <CardBox v-else-if="activeTab === 'users'" has-table class="mb-6">
-        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-          <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th class="px-6 py-3">Tên đăng nhập</th>
-              <th class="px-6 py-3">Họ tên</th>
-              <th class="px-6 py-3">Email</th>
-              <th class="px-6 py-3">Vai trò</th>
-              <th class="px-6 py-3">Trạng thái</th>
-              <th class="px-6 py-3 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="usr in users" :key="usr.user_id" class="border-b bg-white dark:bg-gray-800">
-              <td class="px-6 py-4 font-bold text-blue-600">{{ usr.username }}</td>
-              <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ usr.full_name }}</td>
-              <td class="px-6 py-4">{{ usr.email }}</td>
-              <td class="px-6 py-4 text-xs font-semibold">{{ usr.role_name || usr.role_code }}</td>
-              <td class="px-6 py-4">
-                <span class="rounded px-2.5 py-0.5 text-xs font-medium" :class="usr.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                  {{ usr.is_active ? 'Hoạt động' : 'Bị khóa' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <BaseButton color="info" label="Sửa" small @click="selectedUser = usr; showUserModal = true" />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <BasePagination
-          :current-page="userPage"
-          :total-pages="userTotalPages"
-          :total-items="userTotalItems"
-          @change-page="changeUserPage"
-        />
-      </CardBox>
-    </SectionMain>
+    <!-- Bảng Tài Khoản Người Dùng -->
+    <CardBox v-else-if="activeTab === 'users'" has-table class="mb-6">
+      <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th class="px-6 py-3">Tên đăng nhập</th>
+            <th class="px-6 py-3">Họ tên</th>
+            <th class="px-6 py-3">Email</th>
+            <th class="px-6 py-3">Vai trò</th>
+            <th class="px-6 py-3">Trạng thái</th>
+            <th class="px-6 py-3 text-right">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="usr in users" :key="usr.user_id" class="border-b bg-white dark:bg-gray-800">
+            <td class="px-6 py-4 font-bold text-blue-600">{{ usr.username }}</td>
+            <td class="px-6 py-4 font-semibold text-gray-900 dark:text-white">{{ usr.full_name }}</td>
+            <td class="px-6 py-4">{{ usr.email }}</td>
+            <td class="px-6 py-4 text-xs font-semibold">{{ usr.role_name || usr.role_code }}</td>
+            <td class="px-6 py-4">
+              <span class="rounded px-2.5 py-0.5 text-xs font-medium"
+                :class="usr.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                {{ usr.is_active ? 'Hoạt động' : 'Bị khóa' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <BaseButton color="info" label="Sửa" small @click="selectedUser = usr; showUserModal = true" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <BasePagination :current-page="userPage" :total-pages="userTotalPages" :total-items="userTotalItems"
+        @change-page="changeUserPage" />
+    </CardBox>
+  </SectionMain>
 
-    <!-- Modals -->
-    <UserManageModal v-if="showUserModal" :user="selectedUser" @close="showUserModal = false" @save="handleSaveUser" />
-    <MaterialCreateModal v-if="showMaterialModal" @close="showMaterialModal = false" @save="handleSaveMaterial" />
-    <SupplierCreateModal v-if="showSupplierModal" @close="showSupplierModal = false" @save="handleSaveSupplier" />
-    <ContractPriceModal v-if="showPriceModal" :supplier="selectedSupplier" :materials="materials" @close="showPriceModal = false" @save="handleSavePrice" />
-  </LayoutAuthenticated>
+  <!-- Modals -->
+  <UserManageModal v-if="showUserModal" :user="selectedUser" @close="showUserModal = false" @save="handleSaveUser" />
+  <MaterialCreateModal v-if="showMaterialModal" @close="showMaterialModal = false" @save="handleSaveMaterial" />
+  <SupplierCreateModal v-if="showSupplierModal" @close="showSupplierModal = false" @save="handleSaveSupplier" />
+  <ContractPriceModal v-if="showPriceModal" :supplier="selectedSupplier" :materials="materials"
+    @close="showPriceModal = false" @save="handleSavePrice" />
 </template>

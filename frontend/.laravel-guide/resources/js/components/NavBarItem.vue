@@ -2,7 +2,7 @@
 import BaseDivider from '@/components/BaseDivider.vue';
 import BaseIcon from '@/components/BaseIcon.vue';
 import NavBarMenuList from '@/components/NavBarMenuList.vue';
-import UserAvatarCurrentUser from '@/components/UserAvatarCurrentUser.vue';
+import UserAvatar from '@/components/UserAvatar.vue';
 import { useDarkModeStore } from '@/stores/darkMode';
 import { Link, usePage } from '@inertiajs/vue3';
 import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
@@ -106,7 +106,7 @@ const darkModeStore = useDarkModeStore();
           item.menu,
       }"
     >
-      <UserAvatarCurrentUser v-if="item.isCurrentUser" class="mr-3 inline-flex h-6 w-6" />
+      <UserAvatar v-if="item.isCurrentUser" class="mr-3 inline-flex h-6 w-6" />
       <BaseIcon
         v-if="item.icon"
         :path="item.icon"

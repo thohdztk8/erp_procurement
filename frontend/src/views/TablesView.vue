@@ -11,27 +11,25 @@ import CardBoxComponentEmpty from '@/components/CardBoxComponentEmpty.vue'
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiTableBorder" title="Tables" main>
-      </SectionTitleLineWithButton>
-      <NotificationBar color="info" :icon="mdiMonitorCellphone">
-        <b>Responsive table.</b> Collapses on mobile
-      </NotificationBar>
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiTableBorder" title="Tables" main>
+    </SectionTitleLineWithButton>
+    <NotificationBar color="info" :icon="mdiMonitorCellphone">
+      <b>Responsive table.</b> Collapses on mobile
+    </NotificationBar>
 
-      <CardBox class="mb-6" has-table>
-        <TableSampleClients checkable />
-      </CardBox>
+    <CardBox class="mb-6" has-table>
+      <TableSampleClients checkable />
+    </CardBox>
 
-      <SectionTitleLineWithButton :icon="mdiTableOff" title="Empty variation" />
+    <SectionTitleLineWithButton :icon="mdiTableOff" title="Empty variation" />
 
-      <NotificationBar color="danger" :icon="mdiTableOff">
-        <b>Empty table.</b> When there's nothing to show
-      </NotificationBar>
+    <NotificationBar color="danger" :icon="mdiTableOff">
+      <b>Empty table.</b> When there's nothing to show
+    </NotificationBar>
 
-      <CardBox>
-        <CardBoxComponentEmpty />
-      </CardBox>
-    </SectionMain>
-  </LayoutAuthenticated>
+    <CardBox>
+      <CardBoxComponentEmpty />
+    </CardBox>
+  </SectionMain>
 </template>

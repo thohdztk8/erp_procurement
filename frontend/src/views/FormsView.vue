@@ -55,107 +55,81 @@ const formStatusSubmit = () => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
-    <SectionMain>
-      <SectionTitleLineWithButton :icon="mdiBallotOutline" title="Forms example" main>
-      </SectionTitleLineWithButton>
-      <CardBox form @submit.prevent="submit">
-        <FormField label="Grouped with icons">
-          <FormControl v-model="form.name" :icon="mdiAccount" />
-          <FormControl v-model="form.email" type="email" :icon="mdiMail" />
-        </FormField>
+  <SectionMain>
+    <SectionTitleLineWithButton :icon="mdiBallotOutline" title="Forms example" main>
+    </SectionTitleLineWithButton>
+    <CardBox form @submit.prevent="submit">
+      <FormField label="Grouped with icons">
+        <FormControl v-model="form.name" :icon="mdiAccount" />
+        <FormControl v-model="form.email" type="email" :icon="mdiMail" />
+      </FormField>
 
-        <FormField label="With help line" help="Do not enter the leading zero">
-          <FormControl v-model="form.phone" type="tel" placeholder="Your phone number" />
-        </FormField>
+      <FormField label="With help line" help="Do not enter the leading zero">
+        <FormControl v-model="form.phone" type="tel" placeholder="Your phone number" />
+      </FormField>
 
-        <FormField label="Dropdown">
-          <FormControl v-model="form.department" :options="selectOptions" />
-        </FormField>
+      <FormField label="Dropdown">
+        <FormControl v-model="form.department" :options="selectOptions" />
+      </FormField>
 
-        <BaseDivider />
+      <BaseDivider />
 
-        <FormField label="Question" help="Your question. Max 255 characters">
-          <FormControl type="textarea" placeholder="Explain how we can help you" />
-        </FormField>
+      <FormField label="Question" help="Your question. Max 255 characters">
+        <FormControl type="textarea" placeholder="Explain how we can help you" />
+      </FormField>
 
-        <template #footer>
-          <BaseButtons>
-            <BaseButton type="submit" color="info" label="Submit" />
-            <BaseButton type="reset" color="info" outline label="Reset" />
-          </BaseButtons>
-        </template>
-      </CardBox>
-    </SectionMain>
+      <template #footer>
+        <BaseButtons>
+          <BaseButton type="submit" color="info" label="Submit" />
+          <BaseButton type="reset" color="info" outline label="Reset" />
+        </BaseButtons>
+      </template>
+    </CardBox>
+  </SectionMain>
 
-    <SectionTitle>Custom elements</SectionTitle>
+  <SectionTitle>Custom elements</SectionTitle>
 
-    <SectionMain>
-      <CardBox>
-        <FormField label="Checkbox">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.checkbox"
-            name="sample-checkbox"
-            :options="{ lorem: 'Lorem', ipsum: 'Ipsum', dolore: 'Dolore' }"
-          />
-        </FormField>
+  <SectionMain>
+    <CardBox>
+      <FormField label="Checkbox">
+        <FormCheckRadioGroup v-model="customElementsForm.checkbox" name="sample-checkbox"
+          :options="{ lorem: 'Lorem', ipsum: 'Ipsum', dolore: 'Dolore' }" />
+      </FormField>
 
-        <BaseDivider />
+      <BaseDivider />
 
-        <FormField label="Radio">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.radio"
-            name="sample-radio"
-            type="radio"
-            :options="{ one: 'One', two: 'Two' }"
-          />
-        </FormField>
+      <FormField label="Radio">
+        <FormCheckRadioGroup v-model="customElementsForm.radio" name="sample-radio" type="radio"
+          :options="{ one: 'One', two: 'Two' }" />
+      </FormField>
 
-        <BaseDivider />
+      <BaseDivider />
 
-        <FormField label="Switch">
-          <FormCheckRadioGroup
-            v-model="customElementsForm.switch"
-            name="sample-switch"
-            type="switch"
-            :options="{ one: 'One', two: 'Two' }"
-          />
-        </FormField>
+      <FormField label="Switch">
+        <FormCheckRadioGroup v-model="customElementsForm.switch" name="sample-switch" type="switch"
+          :options="{ one: 'One', two: 'Two' }" />
+      </FormField>
 
-        <BaseDivider />
+      <BaseDivider />
 
-        <FormFilePicker v-model="customElementsForm.file" label="Upload" />
-      </CardBox>
+      <FormFilePicker v-model="customElementsForm.file" label="Upload" />
+    </CardBox>
 
-      <SectionTitle>Form with status example</SectionTitle>
+    <SectionTitle>Form with status example</SectionTitle>
 
-      <CardBox
-        class="shadow-2xl md:mx-auto md:w-7/12 lg:w-5/12 xl:w-4/12"
-        is-form
-        is-hoverable
-        @submit.prevent="formStatusSubmit"
-      >
-        <NotificationBarInCard
-          :color="formStatusOptions[formStatusCurrent]"
-          :is-placed-with-header="formStatusWithHeader"
-        >
-          <span
-            ><b class="capitalize">{{ formStatusOptions[formStatusCurrent] }}</b> state</span
-          >
-        </NotificationBarInCard>
-        <FormField label="Fields">
-          <FormControl
-            v-model="form.name"
-            :icon-left="mdiAccount"
-            help="Your full name"
-            placeholder="Name"
-          />
-        </FormField>
+    <CardBox class="shadow-2xl md:mx-auto md:w-7/12 lg:w-5/12 xl:w-4/12" is-form is-hoverable
+      @submit.prevent="formStatusSubmit">
+      <NotificationBarInCard :color="formStatusOptions[formStatusCurrent]"
+        :is-placed-with-header="formStatusWithHeader">
+        <span><b class="capitalize">{{ formStatusOptions[formStatusCurrent] }}</b> state</span>
+      </NotificationBarInCard>
+      <FormField label="Fields">
+        <FormControl v-model="form.name" :icon-left="mdiAccount" help="Your full name" placeholder="Name" />
+      </FormField>
 
-        <template #footer>
-          <BaseButton label="Trigger" type="submit" color="info" />
-        </template>
-      </CardBox>
-    </SectionMain>
-  </LayoutAuthenticated>
+      <template #footer>
+        <BaseButton label="Trigger" type="submit" color="info" />
+      </template>
+    </CardBox>
+  </SectionMain>
 </template>

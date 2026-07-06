@@ -12,25 +12,27 @@ import WarehouseReturnModal from '@/components/WarehouseReturnModal.vue'
 import StockMovementModal from '@/components/StockMovementModal.vue'
 import BasePagination from '@/components/BasePagination.vue'
 import { warehouseService } from '@/services/api'
-import { useMainStore } from '@/stores/main'
+import { useUserStore } from '@/stores/user'
+import { storeToRefs } from 'pinia'
 
-const mainStore = useMainStore()
+const userStore = useUserStore()
+const { userProfileData } = storeToRefs(userStore)
 
 const hasInventoryPermission = computed(() => {
-  if (mainStore.userRole === 'ADMIN') return true
-  return mainStore.userPermissions.includes('WH_INVENTORY_VIEW')
+  if (userProfileData.value.role === 'ADMIN') return true
+  return userProfileData.value.permissions.includes('WH_INVENTORY_VIEW')
 })
 const hasReceiptPermission = computed(() => {
-  if (mainStore.userRole === 'ADMIN') return true
-  return mainStore.userPermissions.includes('WH_RECEIPT_CREATE')
+  if (userProfileData.value.role === 'ADMIN') return true
+  return userProfileData.value.permissions.includes('WH_RECEIPT_CREATE')
 })
 const hasIssuePermission = computed(() => {
-  if (mainStore.userRole === 'ADMIN') return true
-  return mainStore.userPermissions.includes('WH_ISSUE_CREATE')
+  if (userProfileData.value.role === 'ADMIN') return true
+  return userProfileData.value.permissions.includes('WH_ISSUE_CREATE')
 })
 const hasReturnPermission = computed(() => {
-  if (mainStore.userRole === 'ADMIN') return true
-  return mainStore.userPermissions.includes('WH_RETURN_CREATE')
+  if (userProfileData.value.role === 'ADMIN') return true
+  return userProfileData.value.permissions.includes('WH_RETURN_CREATE')
 })
 
 const activeTab = ref('inventory')
@@ -182,7 +184,6 @@ const changeReturnPage = (page) => {
 </script>
 
 <template>
-  <LayoutAuthenticated>
     <SectionMain>
       <SectionTitleLineWithButton :icon="mdiWarehouse" title="Kho hàng & Nhập kho (GRN)" main>
         <BaseButton v-if="activeTab === 'inventory' && hasReceiptPermission" :icon="mdiPlus" label="Lập Phiếu Nhập Kho (GRN)" color="contrast" small @click="showReceiptModal = true" />
@@ -320,5 +321,4 @@ const changeReturnPage = (page) => {
     <WarehouseIssueModal v-if="showIssueModal" @close="showIssueModal = false" @save="handleSaveIssue" />
     <WarehouseReturnModal v-if="showReturnModal" @close="showReturnModal = false" @save="handleSaveReturn" />
     <StockMovementModal v-if="showMovementModal" :material="selectedMaterial" @close="showMovementModal = false" />
-  </LayoutAuthenticated>
 </template>
