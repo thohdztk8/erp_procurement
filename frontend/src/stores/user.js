@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import api from '@/services/api';
+import * as yup from 'yup';
 
 
 export const useUserStore = defineStore('user', () => {
@@ -25,12 +26,37 @@ export const useUserStore = defineStore('user', () => {
     avatar: "",
   });
 
+  const editUserProfileSchema = ref(
+    yup.object().shape({
+      full_name: yup.string().required('Full name is required'),
+      email: yup.string().email('Invalid email format').required('Email is required'),
+      phone: yup.string().matches(/^\d{10}$/, 'Phone number must be 10 digits').required('Phone number is required'),
+    })
+  )
+
   const editPasswordData = ref({
     user_id: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    password_current: "",
+    password: "",
+    password_confirmation: "",
   });
+
+  const editPasswordSchema = ref(
+    yup.object().shape({
+      password_current: yup.string().required('Current password is required'),
+      password: yup
+        .string()
+        .required('New password is required')
+        .min(8, 'New password must be at least 8 characters')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]).{8,}$/,
+          'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character'
+        ),
+      password_confirmation: yup.string()
+        .oneOf([yup.ref('password'), null], 'Passwords must match')
+        .required('Confirm password is required'),
+    })
+  )
 
   function resetUserProfileData() {
     userProfileData.value = {
@@ -56,18 +82,28 @@ export const useUserStore = defineStore('user', () => {
   function resetEditPasswordData() {
     editPasswordData.value = {
       user_id: "",
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      password_current: "",
+      password: "",
+      password_confirmation: "",
     };
   }
 
-  async function hanldeEditUserProfile() {
-    const res = await api.put(`/auth/users/${editUserProfileData.value.user_id}`, editUserProfileData.value);
+  async function handleEditUserProfile() {
+    const res = await api.put(`/auth/profile`, editUserProfileData.value);
+    if (res && res.data) {
+      setUserProfileData(res.data);
+    }
+
+    return res;
   }
 
   async function handleEditPassword() {
-    const res = await api.put(`/auth/users/${editPasswordData.value.user_id}/password`, editPasswordData.value);
+    const res = await api.post(`/auth/change-password`, editPasswordData.value);
+    if (res && res.data) {
+      resetEditPasswordData();
+    }
+
+    return res;
   }
 
   function logoutUser() {
@@ -103,7 +139,9 @@ export const useUserStore = defineStore('user', () => {
     userProfileData,
     editUserProfileData,
     editPasswordData,
-    hanldeEditUserProfile,
+    editUserProfileSchema,
+    editPasswordSchema,
+    handleEditUserProfile,
     handleEditPassword,
     fetchUserProfile,
     logoutUser,
