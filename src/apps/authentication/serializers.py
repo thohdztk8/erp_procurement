@@ -3,6 +3,7 @@ import datetime
 from django.utils import timezone
 from rest_framework import serializers
 
+from core.validators import validate_vietnamese_phone, validate_strong_password
 from .models import User, Branch
 
 
@@ -82,6 +83,21 @@ class UserProfileSerializer(serializers.ModelSerializer):
         """
         return obj.get_permission_codes()
 
+    def validate_email(self, value):
+        user = self.instance
+        if User.objects.exclude(pk=user.pk if user else None).filter(email=value).exists():
+            raise serializers.ValidationError("Email này đã được sử dụng bởi người dùng khác.")
+        return value
+
+    def validate_phone(self, value):
+        return validate_vietnamese_phone(value)
+
+    def validate_full_name(self, value):
+        name_clean = value.strip()
+        if len(name_clean) < 2:
+            raise serializers.ValidationError("Họ và tên phải có độ dài tối thiểu 2 ký tự.")
+        return name_clean
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     """
@@ -105,6 +121,12 @@ class ChangePasswordSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError("Mật khẩu hiện tại không chính xác.")
         return value
+
+    def validate_password(self, value):
+        user = self.context.get("request").user
+        if user.check_password(value):
+            raise serializers.ValidationError("Mật khẩu mới không được trùng với mật khẩu hiện tại.")
+        return validate_strong_password(value)
 
     def validate(self, attrs):
         """
