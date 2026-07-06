@@ -36,17 +36,24 @@ export const useUserStore = defineStore('user', () => {
 
   const editPasswordData = ref({
     user_id: "",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    password_current: "",
+    password: "",
+    password_confirmation: "",
   });
 
   const editPasswordSchema = ref(
     yup.object().shape({
-      currentPassword: yup.string().required('Current password is required'),
-      newPassword: yup.string().min(6, 'New password must be at least 6 characters').required('New password is required'),
-      confirmPassword: yup.string()
-        .oneOf([yup.ref('newPassword'), null], 'Passwords must match')
+      password_current: yup.string().required('Current password is required'),
+      password: yup
+        .string()
+        .required('New password is required')
+        .min(8, 'New password must be at least 8 characters')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]).{8,}$/,
+          'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 special character'
+        ),
+      password_confirmation: yup.string()
+        .oneOf([yup.ref('password'), null], 'Passwords must match')
         .required('Confirm password is required'),
     })
   )
@@ -75,9 +82,9 @@ export const useUserStore = defineStore('user', () => {
   function resetEditPasswordData() {
     editPasswordData.value = {
       user_id: "",
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      password_current: "",
+      password: "",
+      password_confirmation: "",
     };
   }
 

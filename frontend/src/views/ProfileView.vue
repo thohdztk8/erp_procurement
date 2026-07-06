@@ -98,27 +98,26 @@ const submitEditPassword = async () => {
 
       <CardBox is-form @submit.prevent="submitEditPassword()">
         <FormField label="Current password" help="Required. Your current password"
-          :error="errorsEditPassword.currentPassword">
-          <FormControl v-model="editPasswordData.currentPassword" :icon="mdiAsterisk" name="password_current"
+          :error="errorsEditPassword.password_current ?? null">
+          <FormControl v-model="editPasswordData.password_current" :icon="mdiAsterisk" name="password_current"
             type="password" required autocomplete="current-password" />
         </FormField>
 
         <BaseDivider />
 
-        <FormField label="New password" help="Required. New password" :error="errorsEditPassword.newPassword ?? null">
-          <FormControl v-model="editPasswordData.newPassword" :icon="mdiFormTextboxPassword" name="password"
+        <FormField label="New password" help="Required. New password" :error="errorsEditPassword.password ?? null">
+          <FormControl v-model="editPasswordData.password" :icon="mdiFormTextboxPassword" name="password"
             type="password" required autocomplete="new-password" />
         </FormField>
 
         <FormField label="Confirm password" help="Required. New password one more time"
-          :error="errorsEditPassword.confirmPassword ?? null">
-          <FormControl v-model="editPasswordData.confirmPassword" :icon="mdiFormTextboxPassword"
+          :error="errorsEditPassword.password_confirmation ?? null">
+          <FormControl v-model="editPasswordData.password_confirmation" :icon="mdiFormTextboxPassword"
             name="password_confirmation" type="password" required autocomplete="new-password" />
         </FormField>
 
         <BaseButtons>
-          <BaseButton type="submit" color="info" label="Submit" :disabled="isSubmittingPassword" />
-          <BaseButton color="info" label="Options" outline />
+          <BaseButton type="submit" color="info" label="Thay đổi mật khẩu" :disabled="isSubmittingPassword" />
         </BaseButtons>
       </CardBox>
     </div>
