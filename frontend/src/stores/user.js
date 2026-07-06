@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import api from '@/services/api';
+import * as yup from 'yup';
 
 
 export const useUserStore = defineStore('user', () => {
@@ -25,12 +26,30 @@ export const useUserStore = defineStore('user', () => {
     avatar: "",
   });
 
+  const editUserProfileSchema = ref(
+    yup.object().shape({
+      full_name: yup.string().required('Full name is required'),
+      email: yup.string().email('Invalid email format').required('Email is required'),
+      phone: yup.string().matches(/^\d{10}$/, 'Phone number must be 10 digits').required('Phone number is required'),
+    })
+  )
+
   const editPasswordData = ref({
     user_id: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
+  const editPasswordSchema = ref(
+    yup.object().shape({
+      currentPassword: yup.string().required('Current password is required'),
+      newPassword: yup.string().min(6, 'New password must be at least 6 characters').required('New password is required'),
+      confirmPassword: yup.string()
+        .oneOf([yup.ref('newPassword'), null], 'Passwords must match')
+        .required('Confirm password is required'),
+    })
+  )
 
   function resetUserProfileData() {
     userProfileData.value = {
@@ -62,11 +81,13 @@ export const useUserStore = defineStore('user', () => {
     };
   }
 
-  async function hanldeEditUserProfile() {
+  async function handleEditUserProfile() {
     const res = await api.put(`/auth/profile`, editUserProfileData.value);
     if (res && res.data) {
       setUserProfileData(res.data);
     }
+
+    return res;
   }
 
   async function handleEditPassword() {
@@ -74,6 +95,8 @@ export const useUserStore = defineStore('user', () => {
     if (res && res.data) {
       resetEditPasswordData();
     }
+
+    return res;
   }
 
   function logoutUser() {
@@ -109,7 +132,9 @@ export const useUserStore = defineStore('user', () => {
     userProfileData,
     editUserProfileData,
     editPasswordData,
-    hanldeEditUserProfile,
+    editUserProfileSchema,
+    editPasswordSchema,
+    handleEditUserProfile,
     handleEditPassword,
     fetchUserProfile,
     logoutUser,
