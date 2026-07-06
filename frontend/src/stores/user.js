@@ -63,11 +63,17 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function hanldeEditUserProfile() {
-    const res = await api.put(`/auth/users/${editUserProfileData.value.user_id}`, editUserProfileData.value);
+    const res = await api.put(`/auth/profile`, editUserProfileData.value);
+    if (res && res.data) {
+      setUserProfileData(res.data);
+    }
   }
 
   async function handleEditPassword() {
-    const res = await api.put(`/auth/users/${editPasswordData.value.user_id}/password`, editPasswordData.value);
+    const res = await api.post(`/auth/change-password`, editPasswordData.value);
+    if (res && res.data) {
+      resetEditPasswordData();
+    }
   }
 
   function logoutUser() {
