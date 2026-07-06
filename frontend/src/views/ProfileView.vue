@@ -47,6 +47,27 @@ onMounted(async () => {
 
 const submitProfile = async () => {
   if (isSubmittingProfile.value) return
+
+  const name = (profileForm.full_name || '').trim()
+  if (name.length < 2) {
+    alert('Họ và tên phải có độ dài tối thiểu 2 ký tự.')
+    return
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailPattern.test(profileForm.email)) {
+    alert('Địa chỉ e-mail không hợp lệ.')
+    return
+  }
+
+  if (profileForm.phone) {
+    const phonePattern = /^(0|\+84)(3|5|7|8|9|1[2689])([0-9]{8})$/
+    if (!phonePattern.test(profileForm.phone.trim())) {
+      alert('Số điện thoại không đúng định dạng Việt Nam.')
+      return
+    }
+  }
+
   isSubmittingProfile.value = true
   try {
     const response = await authService.updateProfile({
@@ -65,6 +86,32 @@ const submitProfile = async () => {
 
 const submitPass = async () => {
   if (isSubmittingPass.value) return
+
+  if (passwordForm.password !== passwordForm.password_confirmation) {
+    alert('Xác nhận mật khẩu mới không khớp.')
+    return
+  }
+
+  if (passwordForm.password.length < 8) {
+    alert('Mật khẩu mới phải dài tối thiểu 8 ký tự.')
+    return
+  }
+
+  if (!/[A-Z]/.test(passwordForm.password)) {
+    alert('Mật khẩu mới phải chứa ít nhất một chữ viết hoa.')
+    return
+  }
+
+  if (!/[a-z]/.test(passwordForm.password)) {
+    alert('Mật khẩu mới phải chứa ít nhất một chữ viết thường.')
+    return
+  }
+
+  if (!/[0-9]/.test(passwordForm.password)) {
+    alert('Mật khẩu mới phải chứa ít nhất một số.')
+    return
+  }
+
   isSubmittingPass.value = true
   try {
     const response = await authService.changePassword({
