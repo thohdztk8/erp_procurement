@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { mdiWarehouse, mdiPlus, mdiHistory } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
@@ -12,6 +12,26 @@ import WarehouseReturnModal from '@/components/WarehouseReturnModal.vue'
 import StockMovementModal from '@/components/StockMovementModal.vue'
 import BasePagination from '@/components/BasePagination.vue'
 import { warehouseService } from '@/services/api'
+import { useMainStore } from '@/stores/main'
+
+const mainStore = useMainStore()
+
+const hasInventoryPermission = computed(() => {
+  if (mainStore.userRole === 'ADMIN') return true
+  return mainStore.userPermissions.includes('WH_INVENTORY_VIEW')
+})
+const hasReceiptPermission = computed(() => {
+  if (mainStore.userRole === 'ADMIN') return true
+  return mainStore.userPermissions.includes('WH_RECEIPT_CREATE')
+})
+const hasIssuePermission = computed(() => {
+  if (mainStore.userRole === 'ADMIN') return true
+  return mainStore.userPermissions.includes('WH_ISSUE_CREATE')
+})
+const hasReturnPermission = computed(() => {
+  if (mainStore.userRole === 'ADMIN') return true
+  return mainStore.userPermissions.includes('WH_RETURN_CREATE')
+})
 
 const activeTab = ref('inventory')
 const inventory = ref([])
@@ -42,31 +62,63 @@ const showMovementModal = ref(false)
 const selectedMaterial = ref(null)
 
 const fetchData = async () => {
-  try {
-    const invRes = await warehouseService.getInventory({ page: inventoryPage.value })
-    inventory.value = invRes.data.items || []
-    inventoryTotalPages.value = invRes.data.pagination?.total_pages || 1
-    inventoryTotalItems.value = invRes.data.pagination?.total_items || 0
+  if (hasInventoryPermission.value) {
+    try {
+      const invRes = await warehouseService.getInventory({ page: inventoryPage.value })
+      inventory.value = invRes.data.items || []
+      inventoryTotalPages.value = invRes.data.pagination?.total_pages || 1
+      inventoryTotalItems.value = invRes.data.pagination?.total_items || 0
+    } catch (error) {
+      console.error('Error fetching inventory:', error)
+    }
+  }
 
-    const recRes = await warehouseService.getReceipts({ page: receiptPage.value })
-    receipts.value = recRes.data.items || []
-    receiptTotalPages.value = recRes.data.pagination?.total_pages || 1
-    receiptTotalItems.value = recRes.data.pagination?.total_items || 0
+  if (hasReceiptPermission.value) {
+    try {
+      const recRes = await warehouseService.getReceipts({ page: receiptPage.value })
+      receipts.value = recRes.data.items || []
+      receiptTotalPages.value = recRes.data.pagination?.total_pages || 1
+      receiptTotalItems.value = recRes.data.pagination?.total_items || 0
+    } catch (error) {
+      console.error('Error fetching receipts:', error)
+    }
+  }
 
-    const issRes = await warehouseService.getIssues({ page: issuePage.value })
-    issues.value = issRes.data.items || []
-    issueTotalPages.value = issRes.data.pagination?.total_pages || 1
-    issueTotalItems.value = issRes.data.pagination?.total_items || 0
+  if (hasIssuePermission.value) {
+    try {
+      const issRes = await warehouseService.getIssues({ page: issuePage.value })
+      issues.value = issRes.data.items || []
+      issueTotalPages.value = issRes.data.pagination?.total_pages || 1
+      issueTotalItems.value = issRes.data.pagination?.total_items || 0
+    } catch (error) {
+      console.error('Error fetching issues:', error)
+    }
+  }
 
-    const retRes = await warehouseService.getReturnOrders({ page: returnPage.value })
-    returns.value = retRes.data.items || []
-    returnTotalPages.value = retRes.data.pagination?.total_pages || 1
-    returnTotalItems.value = retRes.data.pagination?.total_items || 0
-  } catch (error) {
-    console.error(error)
+  if (hasReturnPermission.value) {
+    try {
+      const retRes = await warehouseService.getReturnOrders({ page: returnPage.value })
+      returns.value = retRes.data.items || []
+      returnTotalPages.value = retRes.data.pagination?.total_pages || 1
+      returnTotalItems.value = retRes.data.pagination?.total_items || 0
+    } catch (error) {
+      console.error('Error fetching returns:', error)
+    }
   }
 }
-onMounted(() => fetchData())
+
+onMounted(() => {
+  if (hasInventoryPermission.value) {
+    activeTab.value = 'inventory'
+  } else if (hasReceiptPermission.value) {
+    activeTab.value = 'receipts'
+  } else if (hasIssuePermission.value) {
+    activeTab.value = 'issues'
+  } else if (hasReturnPermission.value) {
+    activeTab.value = 'returns'
+  }
+  fetchData()
+})
 
 const handleSaveIssue = async (data) => {
   try {
@@ -133,16 +185,16 @@ const changeReturnPage = (page) => {
   <LayoutAuthenticated>
     <SectionMain>
       <SectionTitleLineWithButton :icon="mdiWarehouse" title="Kho hàng & Nhập kho (GRN)" main>
-        <BaseButton v-if="activeTab === 'inventory'" :icon="mdiPlus" label="Lập Phiếu Nhập Kho (GRN)" color="contrast" small @click="showReceiptModal = true" />
-        <BaseButton v-if="activeTab === 'issues'" :icon="mdiPlus" label="Xuất kho cấp phát" color="contrast" small @click="showIssueModal = true" />
-        <BaseButton v-slot:default v-if="activeTab === 'returns'" :icon="mdiPlus" label="Yêu cầu hoàn trả NCC" color="contrast" small @click="showReturnModal = true" />
+        <BaseButton v-if="activeTab === 'inventory' && hasReceiptPermission" :icon="mdiPlus" label="Lập Phiếu Nhập Kho (GRN)" color="contrast" small @click="showReceiptModal = true" />
+        <BaseButton v-if="activeTab === 'issues' && hasIssuePermission" :icon="mdiPlus" label="Xuất kho cấp phát" color="contrast" small @click="showIssueModal = true" />
+        <BaseButton v-slot:default v-if="activeTab === 'returns' && hasReturnPermission" :icon="mdiPlus" label="Yêu cầu hoàn trả NCC" color="contrast" small @click="showReturnModal = true" />
       </SectionTitleLineWithButton>
 
       <div class="flex space-x-4 mb-4 border-b">
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'inventory' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'inventory'">Tồn kho</button>
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'receipts' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'receipts'">Phiếu nhập (GRN)</button>
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'issues' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'issues'">Xuất kho cấp phát</button>
-        <button class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'returns' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'returns'">Hoàn trả NCC</button>
+        <button v-if="hasInventoryPermission" class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'inventory' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'inventory'">Tồn kho</button>
+        <button v-if="hasReceiptPermission" class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'receipts' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'receipts'">Phiếu nhập (GRN)</button>
+        <button v-if="hasIssuePermission" class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'issues' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'issues'">Xuất kho cấp phát</button>
+        <button v-if="hasReturnPermission" class="pb-2 px-4 text-sm font-semibold transition" :class="activeTab === 'returns' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-500 hover:text-gray-800'" @click="activeTab = 'returns'">Hoàn trả NCC</button>
       </div>
 
       <CardBox v-if="activeTab === 'inventory'" has-table class="mb-6">
