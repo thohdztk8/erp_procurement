@@ -10,6 +10,7 @@ export const useMainStore = defineStore('main', () => {
   const userRole = ref(userFromStorage.role_code || '')
   const userBranch = ref(userFromStorage.branch_name || '')
   const userDept = ref(userFromStorage.dept_name || '')
+  const userPermissions = ref(userFromStorage.permissions || [])
 
   const userAvatar = computed(
     () =>
@@ -34,6 +35,18 @@ export const useMainStore = defineStore('main', () => {
     if (payload.phone !== undefined) {
       userPhone.value = payload.phone
     }
+    if (payload.role_code) {
+      userRole.value = payload.role_code
+    }
+    if (payload.branch_name) {
+      userBranch.value = payload.branch_name
+    }
+    if (payload.dept_name) {
+      userDept.value = payload.dept_name
+    }
+    if (payload.permissions !== undefined) {
+      userPermissions.value = payload.permissions
+    }
     
     // Đồng bộ lại vào localStorage
     if (typeof localStorage !== 'undefined') {
@@ -41,6 +54,10 @@ export const useMainStore = defineStore('main', () => {
       user.full_name = userName.value
       user.email = userEmail.value
       user.phone = userPhone.value
+      user.role_code = userRole.value
+      user.branch_name = userBranch.value
+      user.dept_name = userDept.value
+      user.permissions = userPermissions.value
       localStorage.setItem('user', JSON.stringify(user))
     }
   }
@@ -74,6 +91,7 @@ export const useMainStore = defineStore('main', () => {
     userRole,
     userBranch,
     userDept,
+    userPermissions,
     userAvatar,
     isFieldFocusRegistered,
     clients,

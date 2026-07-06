@@ -130,6 +130,26 @@ router.beforeEach((to, from, next) => {
     next({ name: 'login' })
   } else if (isAuthenticated && (to.name === 'login' || to.path === '/')) {
     next(getFirstAllowedRoute())
+  } else if (isAuthenticated) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    const username = user.username || ''
+    const role_code = user.role_code || ''
+    
+    // Tìm item tương ứng trong menuAsideMain để kiểm tra quyền
+    const matchedMenuItem = menuAsideMain.find(item => item.to === to.path)
+    
+    if (matchedMenuItem && matchedMenuItem.permissions && matchedMenuItem.permissions.length > 0) {
+      if (username !== 'admin' && role_code !== 'ADMIN') {
+        const userPermissions = user.permissions || []
+        const hasPermission = matchedMenuItem.permissions.some(p => userPermissions.includes(p))
+        if (!hasPermission) {
+          // Không có quyền, chuyển hướng sang trang báo lỗi
+          next({ name: 'error' })
+          return
+        }
+      }
+    }
+    next()
   } else {
     next()
   }

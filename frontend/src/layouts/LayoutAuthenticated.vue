@@ -13,10 +13,12 @@ import AsideMenu from '@/components/AsideMenu.vue'
 import FooterBar from '@/components/FooterBar.vue'
 
 import { authService } from '@/services/api.js'
+import { useMainStore } from '@/stores/main.js'
 
 const layoutAsidePadding = 'xl:pl-60'
 
 const darkModeStore = useDarkModeStore()
+const mainStore = useMainStore()
 
 const router = useRouter()
 
@@ -30,14 +32,15 @@ router.beforeEach(() => {
 
 const filteredMenuAsideMain = computed(() => {
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const username = user.username || ''
   return menuAsideMain.filter((item) => {
     if (!item.permissions || item.permissions.length === 0) {
       return true
     }
-    if (user.username === 'admin' || user.role_code === 'ADMIN') {
+    if (username === 'admin' || mainStore.userRole === 'ADMIN') {
       return true
     }
-    const userPermissions = user.permissions || []
+    const userPermissions = mainStore.userPermissions || []
     return item.permissions.some((p) => userPermissions.includes(p))
   })
 })
