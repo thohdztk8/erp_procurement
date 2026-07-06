@@ -8,7 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
-    LoginSerializer, UserProfileSerializer, 
+    LoginSerializer, UserProfileSerializer, ChangePasswordSerializer,
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
     RoleSerializer, PermissionSerializer, BranchSerializer
 )
@@ -95,12 +95,70 @@ class LogoutView(APIView):
 
 
 class ProfileView(APIView):
-    """GET /api/v2/auth/profile — Yêu cầu đăng nhập"""
+    """
+    API hiển thị và cập nhật thông tin cá nhân của người dùng đang đăng nhập.
+    Yêu cầu quyền đăng nhập.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Lấy thông tin cá nhân chi tiết của người dùng hiện tại.
+        :param request: HTTP Request Object.
+        :return: JSON Response chứa thông tin người dùng.
+        """
         serializer = UserProfileSerializer(request.user)
         return Response({"data": serializer.data})
+
+    def put(self, request):
+        """
+        Cập nhật toàn bộ thông tin cá nhân của người dùng hiện tại.
+        :param request: HTTP Request Object chứa dữ liệu cập nhật.
+        :return: JSON Response chứa thông tin sau khi cập nhật.
+        """
+        serializer = UserProfileSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        logger.info("Cập nhật profile thành công cho user: %s", request.user.username)
+        return Response({
+            "message": "Cập nhật thông tin cá nhân thành công.",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        """
+        Cập nhật một phần thông tin cá nhân của người dùng hiện tại.
+        :param request: HTTP Request Object chứa dữ liệu cập nhật.
+        :return: JSON Response chứa thông tin sau khi cập nhật.
+        """
+        return self.put(request)
+
+
+class ChangePasswordView(APIView):
+    """
+    API thay đổi mật khẩu cho người dùng đang đăng nhập.
+    Yêu cầu quyền đăng nhập.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """
+        Đổi mật khẩu tài khoản người dùng hiện tại.
+        :param request: HTTP Request Object chứa thông tin mật khẩu hiện tại và mật khẩu mới.
+        :return: JSON Response thông báo kết quả đổi mật khẩu.
+        """
+        serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        
+        user = request.user
+        user.set_password(serializer.validated_data["password"])
+        user.save()
+        
+        logger.info("Đổi mật khẩu thành công cho user: %s", user.username)
+        return Response({
+            "message": "Thay đổi mật khẩu thành công."
+        }, status=status.HTTP_200_OK)
+
 
 
 class HealthCheckView(APIView):

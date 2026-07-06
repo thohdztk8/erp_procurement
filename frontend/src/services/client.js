@@ -34,8 +34,16 @@ api.interceptors.response.use(
           window.location.href = '#/login'
         }
       } else {
-        const errMsg = error.response.data?.message || error.response.data?.detail || 'Đã xảy ra lỗi hệ thống.'
-        alert(`Lỗi: ${errMsg}`)
+        let errMsg = error.response.data?.message || error.response.data?.detail
+        if (!errMsg && error.response.data && typeof error.response.data === 'object') {
+          errMsg = Object.entries(error.response.data)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join('\n')
+        }
+        if (!errMsg) {
+          errMsg = 'Đã xảy ra lỗi hệ thống.'
+        }
+        alert(`Lỗi:\n${errMsg}`)
       }
     } else {
       alert('Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối mạng.')

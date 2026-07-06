@@ -56,6 +56,9 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer hiển thị và cập nhật thông tin cá nhân của người dùng hiện tại.
+    """
     role_code = serializers.CharField(source="role.role_code", read_only=True)
     branch_name = serializers.CharField(source="branch.branch_name", read_only=True)
     dept_name = serializers.CharField(source="dept.dept_name", read_only=True)
@@ -67,10 +70,54 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "user_id", "username", "full_name", "email", "phone",
             "role_code", "branch_name", "dept_name", "permissions",
         ]
-        read_only_fields = fields
+        read_only_fields = [
+            "user_id", "username", "role_code", "branch_name", "dept_name", "permissions"
+        ]
 
     def get_permissions(self, obj) -> list[str]:
+        """
+        Lấy danh sách mã quyền được gán cho người dùng.
+        :param obj: Thực thể User hiện tại.
+        :return: Danh sách chuỗi mã quyền.
+        """
         return obj.get_permission_codes()
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer xác thực và xử lý yêu cầu thay đổi mật khẩu người dùng.
+    Tham số:
+    - password_current (str): Mật khẩu cũ của người dùng.
+    - password (str): Mật khẩu mới mong muốn thiết lập.
+    - password_confirmation (str): Xác nhận lại mật khẩu mới.
+    """
+    password_current = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True)
+    password_confirmation = serializers.CharField(write_only=True, required=True)
+
+    def validate_password_current(self, value):
+        """
+        Kiểm tra xem mật khẩu hiện tại có trùng khớp với mật khẩu đã lưu của người dùng hay không.
+        :param value: Giá trị mật khẩu nhập vào.
+        :return: Giá trị mật khẩu đã xác thực hợp lệ.
+        """
+        user = self.context.get("request").user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Mật khẩu hiện tại không chính xác.")
+        return value
+
+    def validate(self, attrs):
+        """
+        Xác thực xem mật khẩu mới và xác nhận mật khẩu mới có khớp nhau hay không.
+        :param attrs: Từ điển thuộc tính đầu vào.
+        :return: Từ điển thuộc tính đã xác thực.
+        """
+        if attrs["password"] != attrs["password_confirmation"]:
+            raise serializers.ValidationError(
+                {"password_confirmation": "Xác nhận mật khẩu mới không khớp."}
+            )
+        return attrs
+
 
 
 class RoleSerializer(serializers.ModelSerializer):

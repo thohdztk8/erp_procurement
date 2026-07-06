@@ -1,7 +1,7 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useMainStore } from '@/stores/main'
-import { mdiAccount, mdiMail, mdiAsterisk, mdiFormTextboxPassword } from '@mdi/js'
+import { mdiAccount, mdiMail, mdiAsterisk, mdiFormTextboxPassword, mdiPhone } from '@mdi/js'
 import SectionMain from '@/components/SectionMain.vue'
 import CardBox from '@/components/CardBox.vue'
 import BaseDivider from '@/components/BaseDivider.vue'
@@ -13,12 +13,14 @@ import BaseButtons from '@/components/BaseButtons.vue'
 import UserCard from '@/components/UserCard.vue'
 import LayoutAuthenticated from '@/layouts/LayoutAuthenticated.vue'
 import SectionTitleLineWithButton from '@/components/SectionTitleLineWithButton.vue'
+import { authService } from '@/services/api.js'
 
 const mainStore = useMainStore()
 
 const profileForm = reactive({
-  name: mainStore.userName,
+  full_name: mainStore.userName,
   email: mainStore.userEmail,
+  phone: mainStore.userPhone,
 })
 
 const passwordForm = reactive({
@@ -27,12 +29,59 @@ const passwordForm = reactive({
   password_confirmation: '',
 })
 
-const submitProfile = () => {
-  mainStore.setUser(profileForm)
+const isSubmittingProfile = ref(false)
+const isSubmittingPass = ref(false)
+
+onMounted(async () => {
+  try {
+    const response = await authService.getProfile()
+    if (response && response.data) {
+      mainStore.setUser(response.data)
+      profileForm.full_name = response.data.full_name || ''
+      profileForm.email = response.data.email || ''
+      profileForm.phone = response.data.phone || ''
+    }
+  } catch (error) {
+    console.error('Không thể tải thông tin profile từ DB:', error)
+  }
+})
+
+const submitProfile = async () => {
+  if (isSubmittingProfile.value) return
+  isSubmittingProfile.value = true
+  try {
+    const response = await authService.updateProfile({
+      full_name: profileForm.full_name,
+      email: profileForm.email,
+      phone: profileForm.phone,
+    })
+    mainStore.setUser(response.data)
+    alert(response.message || 'Cập nhật thông tin cá nhân thành công!')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isSubmittingProfile.value = false
+  }
 }
 
-const submitPass = () => {
-  //
+const submitPass = async () => {
+  if (isSubmittingPass.value) return
+  isSubmittingPass.value = true
+  try {
+    const response = await authService.changePassword({
+      password_current: passwordForm.password_current,
+      password: passwordForm.password,
+      password_confirmation: passwordForm.password_confirmation,
+    })
+    alert(response.message || 'Thay đổi mật khẩu thành công!')
+    passwordForm.password_current = ''
+    passwordForm.password = ''
+    passwordForm.password_confirmation = ''
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isSubmittingPass.value = false
+  }
 }
 </script>
 
@@ -50,16 +99,16 @@ const submitPass = () => {
             <FormFilePicker label="Upload" />
           </FormField>
 
-          <FormField label="Name" help="Required. Your name">
+          <FormField label="Họ và tên" help="Bắt buộc. Tên đầy đủ của bạn">
             <FormControl
-              v-model="profileForm.name"
+              v-model="profileForm.full_name"
               :icon="mdiAccount"
-              name="username"
+              name="fullname"
               required
-              autocomplete="username"
+              autocomplete="name"
             />
           </FormField>
-          <FormField label="E-mail" help="Required. Your e-mail">
+          <FormField label="E-mail" help="Bắt buộc. Địa chỉ e-mail">
             <FormControl
               v-model="profileForm.email"
               :icon="mdiMail"
@@ -69,17 +118,25 @@ const submitPass = () => {
               autocomplete="email"
             />
           </FormField>
+          <FormField label="Số điện thoại" help="Số điện thoại liên lạc">
+            <FormControl
+              v-model="profileForm.phone"
+              :icon="mdiPhone"
+              type="tel"
+              name="phone"
+              autocomplete="tel"
+            />
+          </FormField>
 
           <template #footer>
             <BaseButtons>
-              <BaseButton color="info" type="submit" label="Submit" />
-              <BaseButton color="info" label="Options" outline />
+              <BaseButton color="info" type="submit" label="Lưu thông tin" :disabled="isSubmittingProfile" />
             </BaseButtons>
           </template>
         </CardBox>
 
         <CardBox is-form @submit.prevent="submitPass">
-          <FormField label="Current password" help="Required. Your current password">
+          <FormField label="Mật khẩu hiện tại" help="Bắt buộc. Mật khẩu hiện tại của bạn">
             <FormControl
               v-model="passwordForm.password_current"
               :icon="mdiAsterisk"
@@ -92,7 +149,7 @@ const submitPass = () => {
 
           <BaseDivider />
 
-          <FormField label="New password" help="Required. New password">
+          <FormField label="Mật khẩu mới" help="Bắt buộc. Mật khẩu mới">
             <FormControl
               v-model="passwordForm.password"
               :icon="mdiFormTextboxPassword"
@@ -103,7 +160,7 @@ const submitPass = () => {
             />
           </FormField>
 
-          <FormField label="Confirm password" help="Required. New password one more time">
+          <FormField label="Xác nhận mật khẩu mới" help="Bắt buộc. Nhập lại mật khẩu mới">
             <FormControl
               v-model="passwordForm.password_confirmation"
               :icon="mdiFormTextboxPassword"
@@ -116,8 +173,7 @@ const submitPass = () => {
 
           <template #footer>
             <BaseButtons>
-              <BaseButton type="submit" color="info" label="Submit" />
-              <BaseButton color="info" label="Options" outline />
+              <BaseButton type="submit" color="info" label="Đổi mật khẩu" :disabled="isSubmittingPass" />
             </BaseButtons>
           </template>
         </CardBox>
@@ -125,3 +181,4 @@ const submitPass = () => {
     </SectionMain>
   </LayoutAuthenticated>
 </template>
+

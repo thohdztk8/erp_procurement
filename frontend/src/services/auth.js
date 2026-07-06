@@ -28,6 +28,24 @@ export const authService = {
   async getProfile() {
     return await api.get('/auth/profile')
   },
+  
+  /**
+   * Cập nhật thông tin hồ sơ của người dùng hiện tại.
+   * @param {object} data - Dữ liệu cập nhật bao gồm full_name, email, phone.
+   * @returns {Promise<object>} Dữ liệu phản hồi từ API sau khi cập nhật.
+   */
+  async updateProfile(data) {
+    return await api.put('/auth/profile', data)
+  },
+
+  /**
+   * Thay đổi mật khẩu tài khoản người dùng hiện tại.
+   * @param {object} data - Dữ liệu bao gồm password_current, password, password_confirmation.
+   * @returns {Promise<object>} Dữ liệu phản hồi từ API sau khi cập nhật mật khẩu thành công.
+   */
+  async changePassword(data) {
+    return await api.post('/auth/change-password', data)
+  },
 
   /**
    * Log out current user and clear local storage tokens.
@@ -38,7 +56,7 @@ export const authService = {
     if (refresh) {
       try {
         await api.post('/auth/logout', { refresh_token: refresh })
-      } catch (e) {
+      } catch {
         // Ignore errors on logout
       }
     }
