@@ -7,7 +7,6 @@ import CardBox from '@/components/CardBox.vue'
 import BaseDivider from '@/components/BaseDivider.vue'
 import FormField from '@/components/FormField.vue'
 import FormControl from '@/components/FormControl.vue'
-import FormFilePicker from '@/components/FormFilePicker.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import BaseButtons from '@/components/BaseButtons.vue'
 import UserCard from '@/components/UserCard.vue'
@@ -95,10 +94,6 @@ const submitPass = async () => {
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <CardBox is-form @submit.prevent="submitProfile">
-          <FormField label="Avatar" help="Max 500kb">
-            <FormFilePicker label="Upload" />
-          </FormField>
-
           <FormField label="Họ và tên" help="Bắt buộc. Tên đầy đủ của bạn">
             <FormControl
               v-model="profileForm.full_name"
